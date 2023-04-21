@@ -51,28 +51,28 @@ table_1_list <-
   list(
     "Neurological Condition" =
       list(
-        "Stroke" = ~ qwraps2::n_perc0(grepl("Stroke", neurologicalconditions) == "TRUE" , show_symbol = TRUE), 
-        "Multiple sclerosis" = ~ qwraps2::n_perc0(grepl("Multiple sclerosis", neurologicalconditions) == "TRUE", show_symbol = TRUE), 
-        "Parkinson's disease" = ~ qwraps2::n_perc0(grepl("Parkinson's disease", neurologicalconditions) == "TRUE", show_symbol = TRUE), 
-        "Encephalitis" = ~ qwraps2::n_perc0(grepl("Encephalitis", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "Huntington's disease" = ~ qwraps2::n_perc0(grepl("Huntington’s disease", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "Guillain-Barré" = ~ qwraps2::n_perc0(grepl("Guillain-Barré", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "TBI" = ~ qwraps2::n_perc0(grepl("TBI", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "Seizure" = ~ qwraps2::n_perc0(grepl("Seizure", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "Meningitis" = ~ qwraps2::n_perc0(grepl("Meningitis", neurologicalconditions) == "TRUE", show_symbol = TRUE),
-        "Other" = ~ qwraps2::n_perc0(grepl("Other", neurologicalconditions) == "TRUE", show_symbol = TRUE)),
+        "Stroke" = ~ qwraps2::n_perc0(grepl("Stroke", .data$neurologicalconditions) == "TRUE" , show_symbol = TRUE), 
+        "Multiple sclerosis" = ~ qwraps2::n_perc0(grepl("Multiple sclerosis", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE), 
+        "Parkinson's disease" = ~ qwraps2::n_perc0(grepl("Parkinson's disease", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE), 
+        "Encephalitis" = ~ qwraps2::n_perc0(grepl("Encephalitis", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "Huntington's disease" = ~ qwraps2::n_perc0(grepl("Huntington’s disease", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "Guillain-Barré" = ~ qwraps2::n_perc0(grepl("Guillain-Barré", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "TBI" = ~ qwraps2::n_perc0(grepl("TBI", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "Seizure" = ~ qwraps2::n_perc0(grepl("Seizure", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "Meningitis" = ~ qwraps2::n_perc0(grepl("Meningitis", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE),
+        "Other" = ~ qwraps2::n_perc0(grepl("Other", .data$neurologicalconditions) == "TRUE", show_symbol = TRUE)),
     "Functional Outcome" =
         list(
-          "mRS" = ~ qwraps2::n_perc0(grepl("mRS", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "NIHSS" = ~ qwraps2::n_perc0(grepl("NIHSS", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "EDSS" = ~ qwraps2::n_perc0(grepl("EDSS", functional_outcomes) == "TRUE", show_symbol = TRUE),
-          "UPDRS-III" = ~ qwraps2::n_perc0(grepl("UPDRS-III", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "Barthel Index" = ~ qwraps2::n_perc0(grepl("Barthel", functional_outcomes) == "TRUE", show_symbol = TRUE),
-          "GOS" = ~ qwraps2::n_perc0(grepl("unextended", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "GOSE" = ~ qwraps2::n_perc0(grepl("GOSE", functional_outcomes) == "TRUE", show_symbol = TRUE),
-          "PSOM" = ~ qwraps2::n_perc0(grepl("PSOM", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "SIS-16" = ~ qwraps2::n_perc0(grepl("SIS-16", functional_outcomes) == "TRUE", show_symbol = TRUE), 
-          "Other" = ~ qwraps2::n_perc0(grepl("Other", functional_outcomes) == "TRUE", show_symbol = TRUE)
+          "mRS" = ~ qwraps2::n_perc0(grepl("mRS", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "NIHSS" = ~ qwraps2::n_perc0(grepl("NIHSS", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "EDSS" = ~ qwraps2::n_perc0(grepl("EDSS", .data$functional_outcomes) == "TRUE", show_symbol = TRUE),
+          "UPDRS-III" = ~ qwraps2::n_perc0(grepl("UPDRS-III", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "Barthel Index" = ~ qwraps2::n_perc0(grepl("Barthel", .data$functional_outcomes) == "TRUE", show_symbol = TRUE),
+          "GOS" = ~ qwraps2::n_perc0(grepl("unextended", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "GOSE" = ~ qwraps2::n_perc0(grepl("GOSE", .data$functional_outcomes) == "TRUE", show_symbol = TRUE),
+          "PSOM" = ~ qwraps2::n_perc0(grepl("PSOM", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "SIS-16" = ~ qwraps2::n_perc0(grepl("SIS-16", .data$functional_outcomes) == "TRUE", show_symbol = TRUE), 
+          "Other" = ~ qwraps2::n_perc0(grepl("Other", .data$functional_outcomes) == "TRUE", show_symbol = TRUE)
         ))
 
 # create an object for the overall summary statistics            
