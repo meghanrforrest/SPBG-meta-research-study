@@ -1,0 +1,106 @@
+---
+title: "Table 1"
+author: "Meghan Forrest"
+date: "2023-04-08"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(readxl)
+library(table1)
+library(qwraps2)
+library(ggthemes)
+library(ggpubr)
+library(gridExtra)
+library(datasets)
+library(crosstable)
+library(magick)
+```
+
+
+```{r}
+data_inc <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/included_data.csv"))
+```
+
+```{r}
+data_inc <-
+  data_inc %>% 
+
+# add a variable: whether the study includes an adjusted SPBG
+  mutate(
+    contains_adj_spbg = case_when(
+      spbg_present == "No" ~ NA,
+      adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes" ~ "Yes", 
+      adjusted_1 != "Yes" & adjusted_2 != "Yes" & adjusted_3 != "Yes" & adjusted_4 != "Yes" & adjusted_5 != "Yes" ~ "No"
+    ))  %>% 
+
+  select(c("doi", "neurological_condition_1", "neurological_condition_2", "spbg_present", "contains_adj_spbg", "analysis_sample" )) %>% 
+  mutate(
+    neurological_condition_1 = recode(
+      neurological_condition_1,
+      "Ischemic stroke" = "Stroke", 
+      "Hemorrhagic stroke" = "Stroke", 
+      "Stroke (all)" = "Stroke"
+    )) %>% 
+  mutate(
+    analysis_sample = recode(
+      analysis_sample, 
+      "sensitivity" = "Secondary", 
+      "primary" = "Primary"
+    )
+  )
+
+data_inc$spbg_present <- factor(data_inc$spbg_present, levels = c("Yes", "No"), ordered = TRUE)
+data_inc$contains_adj_spbg <- factor(data_inc$contains_adj_spbg, levels = c("Yes", "No", NA), ordered = TRUE)
+
+data_inc <-
+  data_inc %>% 
+  mutate(
+    contains_adj_spbg = recode(
+      contains_adj_spbg, 
+      "Yes" = "contain adjusted version(s)", 
+      "No" = "lack adjusted version(s)"
+    )
+  )
+
+data_inc_adj <-
+  data_inc %>% 
+  filter(contains_adj_spbg == 1)
+  
+```
+ 
+ 
+```{r}
+
+ct_labels = read.table(header=TRUE, text="
+                       name label
+                       spbg_present 'Articles containing SPBG(s)'
+                       contains_adj_spbg  'Articles containing SPBG(s) which'
+                       analysis_sample 'Secondary Analysis Sample'
+                       label ''
+                       total  'Overall Sample'
+                       ")
+data_inc = data_inc %>% 
+  import_labels(ct_labels, name_from = "name", label_from = "label")
+
+library(crosstable)
+
+# Create a cross table of "Category" and "Journal"
+ct <- crosstable(data_inc, 
+                 c(spbg_present, contains_adj_spbg), 
+                 by = analysis_sample,  
+                 total = "both" ,
+                 percent_pattern="{n} ({p_col})", 
+                 percent_digits=1, 
+                 showNA="no") %>% 
+  as_flextable(compact = TRUE)
+
+ct
+
+```
