@@ -1,0 +1,421 @@
+---
+title: "Untitled"
+author: "Meghan Forrest"
+date: "2023-04-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(readxl)
+library(table1)
+library(qwraps2)
+library(ggthemes)
+library(ggpubr)
+library(gridExtra)
+library(datasets)
+```
+
+
+Import Abstraction_master.xlsx. 
+```{r}
+Abstraction_master <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/Abstraction_master.csv"))
+
+# Remove unneeded columns (ID, Startzeit, empty variable, Fertigstellungzeit, E-mail, Name, title, exclusion_details, study_design_other, problems_1, problems_2, problems_3, problems_4, problems_5, abstraction_notes )
+data <- 
+  Abstraction_master %>% 
+  select(!c(1:7, 11, 13, 28, 36, 44, 52, 60, 62)
+         )
+```
+
+
+Parse out excluded studies
+```{r}
+data_exc <- 
+  data %>% 
+  filter(eligiblity == "No") %>% 
+  select(1:3)
+```
+
+
+Parse out included studies
+```{r}
+data_inc <- 
+  data %>% 
+  filter(eligiblity == "Yes") %>% 
+  select(!3) %>% 
+  separate(functional_outcome, into = c("functional_outcome_1", "functional_outcome_2", "functional_outcome_3"),
+             sep = ";",   
+             fill = "right",   
+             remove = FALSE) %>% 
+  
+# standardize formatting of functional outcomes
+  mutate(
+    functional_outcome_1 = recode(functional_outcome_1, 
+                         '(KOSCHI) King’s Outcome Scale for Childhood Head Injury score' = 'KOSCHI', 
+                         'Bayley Scales of Infant Development III' = 'Bayley III', 
+                         'Pediatric Stroke Outcome Measure (PSOM) ' = 'PSOM', 
+                         'Scales  for  Outcomes  in  PD  (SCOPA)' = "SCOPA", 
+                         "Unified  Huntington  Disease  Rating  Scale" = "UHDRS", 
+                         "UPDRS" = "UPDRS (composite)", 
+                         "Total motor scale (TMS)" = "TMS",
+                         "medical research council ( MRC) sum score" = "MRC sum score",
+                         "GBS disability score" = "GBS disability scale", 
+                         "GBS  disability  scale" = "GBS disability scale",
+                         "Pediatric Stroke Outcome Measure (PSOM)" = "PSOM", 
+                         "GOS" = "GOS (unextended)")) %>% 
+    mutate(
+    functional_outcome_2 = recode(functional_outcome_2, 
+                         '(KOSCHI) King’s Outcome Scale for Childhood Head Injury score' = 'KOSCHI', 
+                         'Bayley Scales of Infant Development III' = 'Bayley III', 
+                         'Pediatric Stroke Outcome Measure (PSOM) ' = 'PSOM', 
+                         'Scales  for  Outcomes  in  PD  (SCOPA)' = "SCOPA", 
+                         "Unified  Huntington  Disease  Rating  Scale" = "UHDRS", 
+                         "UPDRS" = "UPDRS (composite)", 
+                         "Total motor scale (TMS)" = "TMS",
+                         " medical research council ( MRC) sum score" = "MRC sum score",
+                         "GBS disability score" = "GBS disability scale", 
+                         "GBS  disability  scale" = "GBS disability scale",
+                         "Pediatric Stroke Outcome Measure (PSOM)" = "PSOM", 
+                         "Multiple Sclerosis Severity Score (MSSS)" = "MSSS", 
+                         " total functional capacity (TFC)" = "TFC", 
+                         "medical research council ( MRC) sum score" = "MRC sum score", 
+                         " Gross Motor Function Classification System (GMFCS)" = "GMFCS", 
+                         " GDS" = "GBS disability scale", 
+                         "MDS-UPDRS" = "UPDRS (composite)", 
+                         " PSOM" = "PSOM", 
+                         " UPDRS-III" = "UPDRS-III", 
+                         " NIHSS" = "NIHSS", 
+                         " Katz index" = "Katz index",
+                         " Rasch- Built  Overall Built Disability Score" = "R-ODS", 
+                         " PCPC" = "PCPC",
+                         "GOS" = "GOS (unextended)"
+                         )) %>% 
+  mutate(
+    functional_outcome_3 = recode(functional_outcome_3,
+                                  "Stroke Impact Scale 16" = "SIS-16")) %>% 
+    separate(neurological_condition, into = c("neurological_condition_1", "neurological_condition_2"),
+             sep = ";",   
+             fill = "right",   
+             remove = TRUE) %>% 
+  
+#standardize formatting of neurological conditions
+  mutate(neurological_condition_1 = recode(neurological_condition_1,
+      "Stroke (all)" = "Stroke (all)", 
+      "encephalitis" = "Encephalitis", 
+      "GBS" = "Guillain-Barré", 
+      "Huntington disease" = "Huntington’s disease", 
+      "Huntington Disease" = "Huntington’s disease"
+  )) %>% 
+  
+# turn roc_present into a binary variable 
+  mutate(
+    roc_present = case_when(
+      roc_present == "Neither" ~ 0, 
+      roc_present == "Neither;" ~ 0,
+      roc_present == "AUC" ~ 1, 
+      roc_present == "AUC;" ~ 1, 
+      roc_present == "AUC;ROC;" ~ 1, 
+      roc_present == "ROC;AUC;" ~ 1
+    )) %>% 
+
+# add a variable: whether the study includes an adjusted SPBG
+  mutate(
+    contains_adj_spbg = case_when(
+      adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes"~ 1
+    ))
+
+data_inc$neurological_condition_1<-gsub(";","",as.character(data_inc$neurological_condition_1))
+data_inc$neurological_condition_2<-gsub(";","",as.character(data_inc$neurological_condition_2))
+
+# separate out figure_other_outcome variable (because some studies have two outcomes which use other figures)
+data_inc <-
+  data_inc %>% 
+  separate(figure_other_outcome, into = c("figure_other_outcome_1", "figure_other_outcome_2"),
+             sep = ",",   
+             fill = "right",   
+             remove = TRUE) 
+
+
+# create variable for how many SPBGs each included record contains
+data_inc <- 
+  data_inc %>% 
+  mutate(
+    spbg_count = case_when(
+    spbg_present == "No" ~ 0, 
+    spbg_present == "Yes" & additional_spbg_1 == "No" ~ 1, 
+    spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "No" ~ 2, 
+    spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes"  & additional_spbg_3 == "No" ~ 3, 
+    spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "No" ~ 4, 
+    spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "Yes" ~ 5
+  ))
+
+# create variable for records which contain an adjusted bar graph
+data_inc <-
+  data_inc %>% 
+  mutate(
+    contains_adj_spbg = case_when(
+      spbg_present == "Yes" & c(adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes") ~ 1, 
+      spbg_present == "No" ~ 99, 
+      spbg_count == 1 & adjusted_1 == "No" ~ 0,
+      spbg_count == 2 & c(adjusted_1 == "No" & adjusted_2 == "No") ~ 0, 
+      spbg_count == 3 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No") ~ 0,
+      spbg_count == 4 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No" & adjusted_4 == "No") ~ 0,
+      spbg_count == 5 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No" & adjusted_4 == "No" & adjusted_5 == "No") ~ 0
+    ))
+  
+
+# MAYBE DELETE THIS create a variable for outcome scales used in SPBG MAYBE DELETE THIS
+data_inc <-
+  data_inc %>% 
+    mutate(
+    spbg_outcome  = recode(
+      figure_outcome_1,
+      "GDS" = "GBS disability scale")) %>% 
+  mutate(
+    SPBG_outcome = case_when(
+      c(figure_outcome_1  == "mRS" | figure_outcome_2 == "mRS" | figure_outcome_3 == "mRS" | data_inc$figure_outcome_4 == "mRS" | data_inc$figure_outcome_5 == "mRS" ) & c(functional_outcome_1 == "mRS" |  functional_outcome_2== "mRS" | functional_outcome_3 == "mRS") ~ "mRS", 
+      c(figure_outcome_1  == "GOSE" |data_inc$figure_outcome_2 == "GOSE" | data_inc$figure_outcome_3 == "GOSE" | data_inc$figure_outcome_4 == "GOSE" | data_inc$figure_outcome_5 == "GOSE" ) & c(functional_outcome_1 == "GOSE" |  functional_outcome_2== "GOSE" | functional_outcome_3 == "GOSE") ~ "GOSE", 
+      c(figure_outcome_1  == "NIHSS" |data_inc$figure_outcome_2 == "NIHSS" | data_inc$figure_outcome_3 == "NIHSS" | data_inc$figure_outcome_4 == "NIHSS" | data_inc$figure_outcome_5 == "NIHSS" ) & c(functional_outcome_1 == "NIHSS" |  functional_outcome_2== "NIHSS" | functional_outcome_3 == "NIHSS") ~ "NIHSS",
+    c(figure_outcome_1  == "PSOM" |data_inc$figure_outcome_2 == "PSOM" | data_inc$figure_outcome_3 == "PSOM" | data_inc$figure_outcome_4 == "PSOM" | data_inc$figure_outcome_5 == "PSOM" ) & c(functional_outcome_1 == "PSOM" |  functional_outcome_2== "PSOM" | functional_outcome_3 == "PSOM") ~ "PSOM", 
+    figure_outcome_1  == "GBS disability scale"  & c(functional_outcome_1 == "GBS disability scale" |  functional_outcome_2== "GBS disability scale" | functional_outcome_3 == "GBS disability scale") ~ "GBS disability scale",
+    figure_outcome_1  == "RS"  & c(functional_outcome_1 == "RS" |  functional_outcome_2== "RS" | functional_outcome_3 == "RS") ~ "RS"
+    ))
+
+# create a variable for whether the study is in primary or secondary analysis
+data_inc <-
+  data_inc %>% 
+  mutate(
+    analysis_sample = case_when(
+      covariate_intent =="Yes" & roc_present == 0 & effect_estimate != "Beta coefficient(s) only" ~ "primary", 
+      covariate_intent =="No" | roc_present == 1 | effect_estimate == "Beta coefficient(s) only" ~ "sensitivity")
+    )
+
+```
+
+
+Create primary and sensitivity analysis dataset
+```{r}
+data_primary <-
+  data_inc %>% 
+  filter(analysis_sample == "primary")
+  
+data_primary_spbg <- 
+  data_primary %>% 
+  filter(spbg_present == "Yes")
+
+data_sensitivity <- 
+  data_inc %>% 
+  filter(covariate_intent == "No" | roc_present == 1 | effect_estimate == "Beta coefficient(s) only")
+
+data_sensitivity_spbg <- 
+  data_sensitivity %>% 
+  filter(spbg_present == "Yes")
+
+```
+
+
+
+Create dataset for SPBGs
+```{r}
+contains_spbg <- 
+  data_inc %>% 
+  filter(spbg_present == "Yes") %>% 
+  select(c(doi, functional_outcome_1, functional_outcome_2, functional_outcome_3, neurological_condition_1, neurological_condition_2, effect_estimate, roc_present, covariate_intent, figure_other_outcome_1, figure_other_outcome_2, spbg_count, contains_adj_spbg, figure_outcome_1, figure_outcome_2, figure_outcome_3, figure_outcome_4, figure_outcome_5, SPBG_outcome)) 
+
+
+
+```
+
+
+Prepare a dataset to make barplots
+```{r}
+barplot_data <-
+  data_inc %>% 
+  mutate(
+    any_figure_contains = case_when(
+     contains_adj_spbg == 0 ~ "Unadjusted SPBG", 
+     contains_adj_spbg == 1 ~ "Adjusted SPBG", 
+     figure_other == "Yes" & spbg_present == "No" ~ "Other figure (No SPBG)", 
+     figure_other == "No" & spbg_present == "No" ~ "No figure")) %>% 
+  mutate(
+    neurological_condition_1 = recode(
+      neurological_condition_1,
+      "Ischemic stroke" = "Stroke", 
+      "Hemorrhagic stroke" = "Stroke", 
+      "Stroke (all)" = "Stroke"
+    )) %>% 
+  pivot_longer(
+    names_to = "which_neuropathology", 
+    values_to = "neuropathology", 
+    cols = neurological_condition_1:neurological_condition_2) %>% 
+  filter(neuropathology != "") 
+
+barplot_data$any_figure_contains <- 
+  factor(barplot_data$any_figure_contains, levels = c("No figure", "Other figure (No SPBG)", "Unadjusted SPBG", "Adjusted SPBG"), ordered = TRUE)
+```
+mutate(
+    any_figure_contains = recode(
+      any_figure_contains,
+      "SPBG" = "Stacked proportional bar graph"))
+
+Make a barplot for stroke vs. other condtions
+barplot_data_stroke <- barplot_data
+```{r}
+
+barplot_data_stroke <- barplot_data
+barplot_data_stroke$neuropathology[barplot_data_stroke$neuropathology %in% names(which(table(barplot_data_stroke$neuropathology) < 100))] = "Other *"
+
+positions_stroke <- c("Other *", "Stroke")
+
+
+barplot_allneuro <- ggplot(barplot_data_stroke, aes(x= neuropathology, fill = any_figure_contains)) + 
+  geom_bar(width = 0.4) + 
+  scale_x_discrete(limits = positions_stroke) +
+  scale_fill_manual(values = c("#4773a3",  "#a4c3d7", "#FFE082", "grey93"), 
+                    limits = c("Adjusted SPBG", "Unadjusted SPBG", "Other figure (No SPBG)", "No figure")) +
+  theme(
+    panel.background = element_blank(), 
+    panel.grid.major.x = element_line(color = "lightgrey",
+                                          size = 0.3,
+                                          linetype = 5), 
+    panel.grid.minor.x = element_line(color = "lightgrey",
+                                          size = 0.5,
+                                          linetype = 3),
+    axis.text.x = element_text(size=  9, face = "bold", colour = "black"), 
+    axis.text.y = element_text(size= 9, colour = "black",  margin = margin(r = 5)),
+    legend.title=element_blank(),
+    legend.key.size = unit(1, 'cm'),
+        legend.key.height = unit(.3, 'cm'),
+        legend.key.width = unit(.35, 'cm'),
+        legend.text = element_text(size = 9), 
+    legend.position = c(0.5, 1.0),
+    legend.direction="horizontal",
+    axis.ticks = element_blank(), 
+    axis.title.y=element_blank(), 
+    axis.title.x=element_blank(), 
+    panel.border = element_rect(colour = "lightgrey", fill=NA, size=0.5), 
+    plot.margin = unit(c(0.8,3,0,0), "cm")) +
+  coord_flip() +
+  geom_text(
+    stat= 'count' , aes(label=..count..), 
+            position = position_stack(vjust = .5), 
+            size = 2.5, 
+            color = 'grey16') +
+  annotate("text", x = 2, y = 203, label = "n = 192", size = 3) +
+  annotate("text", x = 1, y = 70, label = "n = 60", size = 3)
+
+barplot_allneuro
+barplot_allneuro <- barplot_allneuro + 
+  scale_y_continuous(breaks = c(0, 25, 50, 75, 100, 125, 150, 175, 200), labels = c(0, 25, 50, 75, 100, 125, 150, 175, 200))
+
+```
+
+Make barplot of all conditions except stroke
+```{r}
+
+barplot_data_notstroke <-
+  barplot_data %>% 
+  mutate(
+    any_figure_contains = case_when(
+     spbg_present == "Yes" ~ "SPBG", 
+     figure_other == "Yes" & spbg_present == "No" ~ "Other figure (No SPBG)", 
+     figure_other == "No" & spbg_present == "No" ~ "No figure")) %>% 
+  filter(neuropathology!= "Stroke") %>% 
+  mutate(
+    neuropathology = recode(neuropathology,
+      "TBI" = "Traumatic brain injury"
+    )
+  )
+
+
+
+barplot_data_notstroke$neuropathology[barplot_data_notstroke$neuropathology%in% names(which(table(barplot_data_notstroke$neuropathology) < 3))] = "Other †"
+
+positions_notstroke <- c("Other †", "Traumatic brain injury", "Guillain-Barré",  "Encephalitis", "Huntington’s disease", "Parkinson's disease", "Multiple sclerosis")
+
+
+barplot_notstroke <- ggplot(barplot_data_notstroke, aes(x = neuropathology, fill = any_figure_contains)) + 
+  geom_bar(width = 0.8) +
+  scale_fill_manual(values = c("grey93", "#FFE082", "#a4c3d7")) + 
+  scale_x_discrete(limits = positions_notstroke) +
+  coord_flip() +
+  theme(
+    panel.background = element_blank(), 
+    panel.grid.major.x = element_line(color = "lightgrey",
+                                          size = 0.25,
+                                          linetype = 5), 
+     panel.grid.minor.x = element_line(color = "lightgrey",
+                                          size = 0.5,
+                                          linetype = 3),
+    axis.text.x = element_text(size= 9, face="bold", colour = "black"), 
+    axis.text.y = element_text(size= 9, colour = "black"), 
+    axis.title.y=element_blank(), 
+    legend.title=element_blank(), 
+    legend.position = "none",
+    axis.ticks = element_blank(), 
+    panel.border = element_rect(colour = "lightgrey", fill=NA, size=0.5), 
+    axis.title.x = element_text(size = 10), 
+    plot.margin = unit(c(1.0,0,0,0), "cm")) + 
+  ylab("Number of Papers") +
+  geom_text(stat= 'count' , aes(label=..count..), 
+            position = position_stack(vjust = .5), 
+            color = 'grey16', 
+            size = 2.5) +
+  ylim(0, 27) +
+  annotate("text", x = 1, y = 11.5, label = "n = 10", size = 3)+
+  annotate("text", x = 2, y = 5.5, label = "n = 4", size = 3) +
+  annotate("text", x = 3, y = 4.5, label = "n = 3", size = 3) +
+  annotate("text", x = 4, y = 4.5, label = "n = 3", size = 3) +
+  annotate("text", x = 5, y = 4.5, label = "n = 3", size = 3) +
+  annotate("text", x = 6, y = 13.5, label = "n = 12", size = 3) +
+  annotate("text", x = 7, y = 26.5, label = "n = 25", size = 3)
+
+
+barplot_notstroke
+
+barplot_notstroke <- 
+  barplot_notstroke +
+  scale_y_continuous(breaks = c(0, 5, 10, 15, 20, 25), labels = c(0, 5, 10, 15, 20, 25))
+
+ barplot_notstroke
+    
+```
+("lightcyan2", "#FFE082", "darkorange2")) 
+ device= 'tiff', 
+       dpi=700)
+       ggsave("figure3_draft4.png")
+Combine both bargraphs into one figure
+```{r}
+combined_barplot <- ggarrange(
+  barplot_allneuro,
+  barplot_notstroke, 
+  labels = c("A", "B"),
+  ncol = 1, nrow = 2, 
+  heights  = c(1.23,2), 
+  align = "v")
+
+combined_barplot
+
+ggsave("figure3_draft5.png")
+```
+
+
+```{r}
+
+gA <- ggplotGrob(barplot_allneuro)
+gB <- ggplotGrob(barplot_notstroke)
+gB$layout$clip[gB$layout$name == "panel"] <- "off"
+maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5])
+gA$widths[2:5] <- as.list(maxWidth)
+gB$widths[2:5] <- as.list(maxWidth)
+
+gB$widths <- gA$widths
+
+grid.arrange(gA, gB, ncol=1)
+
+```
+
