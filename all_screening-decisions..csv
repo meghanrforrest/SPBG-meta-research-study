@@ -4400,6 +4400,6 @@ doi,rev1_ta,rev2_ta,rev1_ta_decision,rev2_ta_decision,ta_decision,rev1_ft,rev2_f
 10.1212/WNL.0000000000012725,mf,el,0,-1,ft_scrn,mf,ef,-1,1,conflict,"""no aEE""",NULL,discrepancy,exclude,"""no aEE""",6,0
 10.1212/WNL.0000000000012894,mf,el,0,-1,ft_scrn,mf,ef,-1,1,conflict,"""no aEE""",NULL,discrepancy,exclude,"""no aEE""",6,0
 10.1212/WNL.0000000000013087,mf,el,0,-1,ft_scrn,mf,ef,-1,1,conflict,"""wrong outcome""",NULL,discrepancy,exclude,"""no aEE""",6,0
-10.1016/S1474-4422(19)30488-0,mf,el,0,-1,ft_scrn,,,,,,,,,,,,
-10.1016/S1474-4422(20)30037-5,mf,el,0,0,ft_scrn,,,,,,,,,,,,
-10.1016/S1474-4422(20)30406-3,mf,el,0,0,ft_scrn,,,,,,,,,,,,
+10.1016/S1474-4422(19)30488-0,mf,el,0,-1,ft_scrn,mf,el,-1,0,conflict,""wrong outcome"",NULL,discrepancy,exclude,""wrong outcome"",5,0
+10.1016/S1474-4422(20)30037-5,mf,el,0,0,ft_scrn,mf,el,-1,0,conflict,""no aEE"",NULL,discrepancy,exclude,""no aEE"",6,0
+10.1016/S1474-4422(20)30406-3,mf,el,0,0,ft_scrn,mf,el,-1,0,conflict,""wrong study design"",NULL,discrepancy,exclude,""wrong study design"",4,0
