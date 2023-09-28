@@ -1,0 +1,55 @@
+---
+title: "Grotta Bar, Figure 1 SPBG Manuscript"
+author: "Meghan Forrest"
+format: pdf
+editor: visual
+---
+
+
+
+```{r}
+# load packages
+library(rankinPlot)
+library(tidyverse)
+library(RColorBrewer)
+
+# load data
+grotta_dat <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/figure1_dataset.csv")) %>% 
+  select(!"participant") 
+
+grotta_dat$dc_status <- factor(grotta_dat$dc_status, 
+                               levels = c("Not discharged home", "Discharged home"))
+
+grotta_dat$adj <- factor(grotta_dat$adj, 
+                         levels = c("unadjusted", "adjusted"))
+
+
+
+
+grotta_dat_dc_unadj <-
+  grotta_dat %>% 
+  filter(dc_status == "Discharged home")
+
+grotta_dat_notdc_unadj <-
+  grotta_dat %>% 
+  filter(dc_status == "Not discharged home")
+
+table(grotta_dat_notdc_unadj$mrs)
+
+```
+
+```{r}
+
+x <- table( mRS = grotta_dat$mrs,  Group = grotta_dat$dc_status, adjustment = grotta_dat$adj)
+
+custom_colors <- c("#003366", "#4773a3", "#a4c3d7", "#FFE082", "#F4A582", "#D6604D", "#B2182B")
+
+grottaBar(x, 
+          groupName = "Group", 
+          scoreName = "mRS", 
+          strataName = "adjustment", 
+          width = 0.8, textSize = 10, 
+          numberSize = 2, 
+          colorScheme = "custom") + scale_fill_manual(values = custom_colors)
+
+```
