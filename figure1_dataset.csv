@@ -49,106 +49,106 @@ participant,mrs,dc_status,adj
 48,1,Discharged home,unadjusted
 49,1,Discharged home,unadjusted
 50,1,Discharged home,unadjusted
-51,1,Not discharged home,unadjusted
-52,1,Not discharged home,unadjusted
-53,1,Not discharged home,unadjusted
-54,1,Not discharged home,unadjusted
-55,1,Not discharged home,unadjusted
-56,1,Not discharged home,unadjusted
-57,1,Not discharged home,unadjusted
-58,1,Not discharged home,unadjusted
-59,1,Not discharged home,unadjusted
-60,1,Not discharged home,unadjusted
-61,1,Not discharged home,unadjusted
-62,1,Not discharged home,unadjusted
-63,1,Not discharged home,unadjusted
-64,1,Not discharged home,unadjusted
-65,1,Not discharged home,unadjusted
-66,1,Not discharged home,unadjusted
-67,1,Not discharged home,unadjusted
-68,1,Not discharged home,unadjusted
-69,1,Not discharged home,unadjusted
-70,1,Not discharged home,unadjusted
-71,1,Not discharged home,unadjusted
-72,1,Not discharged home,unadjusted
-73,1,Not discharged home,unadjusted
-74,1,Not discharged home,unadjusted
-75,2,Not discharged home,unadjusted
-76,2,Not discharged home,unadjusted
-77,2,Not discharged home,unadjusted
-78,2,Not discharged home,unadjusted
-79,2,Not discharged home,unadjusted
-80,2,Not discharged home,unadjusted
-81,2,Not discharged home,unadjusted
-82,2,Not discharged home,unadjusted
-83,2,Not discharged home,unadjusted
-84,2,Not discharged home,unadjusted
-85,2,Not discharged home,unadjusted
-86,2,Not discharged home,unadjusted
-87,3,Not discharged home,unadjusted
-88,3,Not discharged home,unadjusted
-89,3,Not discharged home,unadjusted
-90,3,Not discharged home,unadjusted
-91,3,Not discharged home,unadjusted
-92,3,Not discharged home,unadjusted
-93,3,Not discharged home,unadjusted
-94,3,Not discharged home,unadjusted
-95,3,Not discharged home,unadjusted
-96,3,Not discharged home,unadjusted
-97,4,Not discharged home,unadjusted
-98,4,Not discharged home,unadjusted
-99,5,Not discharged home,unadjusted
-100,6,Not discharged home,unadjusted
-101,0,Discharged home,unadjusted
-102,0,Discharged home,unadjusted
-103,0,Discharged home,unadjusted
-104,0,Discharged home,unadjusted
-105,0,Discharged home,unadjusted
-106,0,Discharged home,unadjusted
-107,0,Discharged home,unadjusted
-108,0,Discharged home,unadjusted
-109,0,Discharged home,unadjusted
-110,0,Discharged home,unadjusted
-111,0,Discharged home,unadjusted
-112,0,Discharged home,unadjusted
-113,0,Discharged home,unadjusted
-114,1,Discharged home,unadjusted
-115,1,Discharged home,unadjusted
-116,1,Discharged home,unadjusted
-117,1,Discharged home,unadjusted
-118,1,Discharged home,unadjusted
-119,1,Discharged home,unadjusted
-120,1,Discharged home,unadjusted
-121,1,Discharged home,unadjusted
-122,1,Discharged home,unadjusted
-123,1,Discharged home,unadjusted
-124,1,Discharged home,unadjusted
-125,1,Discharged home,unadjusted
-126,1,Discharged home,unadjusted
-127,1,Discharged home,unadjusted
-128,1,Discharged home,unadjusted
-129,1,Discharged home,unadjusted
-130,1,Discharged home,unadjusted
-131,2,Discharged home,unadjusted
-132,2,Discharged home,unadjusted
-133,2,Discharged home,unadjusted
-134,2,Discharged home,unadjusted
-135,2,Discharged home,unadjusted
-136,2,Discharged home,unadjusted
-137,2,Discharged home,unadjusted
-138,2,Discharged home,unadjusted
-139,2,Discharged home,unadjusted
-140,2,Discharged home,unadjusted
-141,2,Discharged home,unadjusted
-142,2,Discharged home,unadjusted
-143,3,Discharged home,unadjusted
-144,3,Discharged home,unadjusted
-145,3,Discharged home,unadjusted
-146,3,Discharged home,unadjusted
-147,3,Discharged home,unadjusted
-148,3,Discharged home,unadjusted
-149,3,Discharged home,unadjusted
-150,3,Discharged home,unadjusted
+51,1,Discharged home,unadjusted
+52,1,Discharged home,unadjusted
+53,1,Discharged home,unadjusted
+54,1,Discharged home,unadjusted
+55,1,Discharged home,unadjusted
+56,1,Discharged home,unadjusted
+57,1,Discharged home,unadjusted
+58,1,Discharged home,unadjusted
+59,1,Discharged home,unadjusted
+60,1,Discharged home,unadjusted
+61,1,Discharged home,unadjusted
+62,1,Discharged home,unadjusted
+63,1,Discharged home,unadjusted
+64,1,Discharged home,unadjusted
+65,1,Discharged home,unadjusted
+66,1,Discharged home,unadjusted
+67,1,Discharged home,unadjusted
+68,1,Discharged home,unadjusted
+69,1,Discharged home,unadjusted
+70,1,Discharged home,unadjusted
+71,1,Discharged home,unadjusted
+72,1,Discharged home,unadjusted
+73,1,Discharged home,unadjusted
+74,1,Discharged home,unadjusted
+75,2,Discharged home,unadjusted
+76,2,Discharged home,unadjusted
+77,2,Discharged home,unadjusted
+78,2,Discharged home,unadjusted
+79,2,Discharged home,unadjusted
+80,2,Discharged home,unadjusted
+81,2,Discharged home,unadjusted
+82,2,Discharged home,unadjusted
+83,2,Discharged home,unadjusted
+84,2,Discharged home,unadjusted
+85,2,Discharged home,unadjusted
+86,2,Discharged home,unadjusted
+87,3,Discharged home,unadjusted
+88,3,Discharged home,unadjusted
+89,3,Discharged home,unadjusted
+90,3,Discharged home,unadjusted
+91,3,Discharged home,unadjusted
+92,3,Discharged home,unadjusted
+93,3,Discharged home,unadjusted
+94,3,Discharged home,unadjusted
+95,3,Discharged home,unadjusted
+96,3,Discharged home,unadjusted
+97,4,Discharged home,unadjusted
+98,4,Discharged home,unadjusted
+99,5,Discharged home,unadjusted
+100,6,Discharged home,unadjusted
+101,0,Not discharged home,unadjusted
+102,0,Not discharged home,unadjusted
+103,0,Not discharged home,unadjusted
+104,0,Not discharged home,unadjusted
+105,0,Not discharged home,unadjusted
+106,0,Not discharged home,unadjusted
+107,0,Not discharged home,unadjusted
+108,0,Not discharged home,unadjusted
+109,0,Not discharged home,unadjusted
+110,0,Not discharged home,unadjusted
+111,0,Not discharged home,unadjusted
+112,0,Not discharged home,unadjusted
+113,0,Not discharged home,unadjusted
+114,1,Not discharged home,unadjusted
+115,1,Not discharged home,unadjusted
+116,1,Not discharged home,unadjusted
+117,1,Not discharged home,unadjusted
+118,1,Not discharged home,unadjusted
+119,1,Not discharged home,unadjusted
+120,1,Not discharged home,unadjusted
+121,1,Not discharged home,unadjusted
+122,1,Not discharged home,unadjusted
+123,1,Not discharged home,unadjusted
+124,1,Not discharged home,unadjusted
+125,1,Not discharged home,unadjusted
+126,1,Not discharged home,unadjusted
+127,1,Not discharged home,unadjusted
+128,1,Not discharged home,unadjusted
+129,1,Not discharged home,unadjusted
+130,1,Not discharged home,unadjusted
+131,2,Not discharged home,unadjusted
+132,2,Not discharged home,unadjusted
+133,2,Not discharged home,unadjusted
+134,2,Not discharged home,unadjusted
+135,2,Not discharged home,unadjusted
+136,2,Not discharged home,unadjusted
+137,2,Not discharged home,unadjusted
+138,2,Not discharged home,unadjusted
+139,2,Not discharged home,unadjusted
+140,2,Not discharged home,unadjusted
+141,2,Not discharged home,unadjusted
+142,2,Not discharged home,unadjusted
+143,3,Not discharged home,unadjusted
+144,3,Not discharged home,unadjusted
+145,3,Not discharged home,unadjusted
+146,3,Not discharged home,unadjusted
+147,3,Not discharged home,unadjusted
+148,3,Not discharged home,unadjusted
+149,3,Not discharged home,unadjusted
+150,3,Not discharged home,unadjusted
 151,3,Not discharged home,unadjusted
 152,3,Not discharged home,unadjusted
 153,3,Not discharged home,unadjusted
