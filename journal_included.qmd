@@ -1,0 +1,62 @@
+---
+title: "all records with journal"
+author: "meghan forrest"
+format: html
+editor: visual
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+```
+
+## Load data
+
+```{r}
+screening_master <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/all_screening-decisions..csv")) 
+
+pubmed_mar62024 <- read_csv("/Users/meghanforrest/Documents/Research Projects/SPBG/SPBG_data/pubmed_mar62024.csv") |> 
+  rename("doi" = "DOI")
+```
+
+
+**Merge datasets**
+
+```{r}
+combined_data <- merge(pubmed_mar62024, 
+                       screening_master, 
+                       by = "doi", 
+                       all = TRUE)
+
+
+na_observations <- combined_data[is.na(combined_data$`Journal/Book`), ]
+na_doi <- na_observations |> 
+  select("doi", "Journal/Book")
+  
+combined_data <-
+  combined_data |> 
+  mutate(`Journal/Book` = case_when(
+    doi == "10.1093/brain/awab484" ~ "Brain", 
+    doi == "10.1161/STROKEAHA.119.027557" ~ "Stroke", 
+    doi == "10.1212/WNL.0000000000011106" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000011450" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012023" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000011453" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012032" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012074" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012106" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012246" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012285" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000012604" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013079" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013080" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013081" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013119" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013121" ~ "JAMA Neurol",
+    doi == "10.1212/WNL.0000000000013123" ~ "JAMA Neurol", 
+    TRUE ~ value))
+
+```
+
+
+

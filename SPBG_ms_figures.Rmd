@@ -1,0 +1,393 @@
+---
+title: "Tables"
+author: "Meghan Forrest"
+date: "2024-03-02"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+classoption: landscape
+---
+
+```{r setup, include=FALSE}
+library(readr)
+library(tidyverse)
+library(stringr)
+library(ggplot2)
+library(readxl)
+library(table1)
+library(qwraps2)
+library(ggthemes)
+library(ggpubr)
+library(gridExtra)
+library(datasets)
+library(forcats)
+library(patchwork)
+library(grid)
+library(table1)
+library(flextable)
+library(magrittr)
+
+Abstraction_master <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/Abstraction_master.csv"))
+```
+
+# Import dataset and restructure.
+
+```{r, echo = FALSE}
+
+# filter for only included studies
+
+dat_incl <- Abstraction_master |> 
+  filter(eligiblity == "Yes") |> 
+  
+  
+  # create variable for spbg count per study  
+  
+  mutate(
+    spbg_count = case_when(
+      spbg_present == "No" ~ 0, 
+      spbg_present == "Yes" & additional_spbg_1 == "No" ~ 1, 
+      spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "No" ~ 2, 
+      spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes"  & additional_spbg_3 == "No" ~ 3, 
+      spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "No" ~ 4, 
+      spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "Yes" ~ 5)) |>
+  
+  # create variable for records which contain an ADJUSTED spbg
+  mutate(
+    contains_adj_spbg = case_when(
+      spbg_present == "Yes" & c(adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes") ~ "Yes", 
+      spbg_present == "No" ~ NA, 
+      spbg_count == 1 & adjusted_1 == "No" ~ "No",
+      spbg_count == 2 & c(adjusted_1 == "No" & adjusted_2 == "No") ~ "No", 
+      spbg_count == 3 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No") ~ "No",
+      spbg_count == 4 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No" & adjusted_4 == "No") ~ "No",
+      spbg_count == 5 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No" & adjusted_4 == "No" & adjusted_5 == "No") ~ "No")
+    ) |> 
+  
+
+  
+  # separate out neurological conditions by ;
+  separate(neurological_condition, into = c("condition1", "condition2"),
+             sep = ";",   
+             fill = "right",   
+             remove = TRUE) |> 
+  
+  # clean up names of neuropathologies
+  mutate(condition1 = recode(condition1,
+      "Stroke (all)" = "Stroke (all)", 
+      "encephalitis" = "Encephalitis", 
+      "GBS" = "Guillain-Barré", 
+      "Huntington disease" = "Huntington’s disease", 
+      "Huntington Disease" = "Huntington’s disease")
+      ) |> 
+  
+  mutate(condition2 = if_else( 
+         condition2 == "", NA_character_, condition2)
+         )|> 
+  
+  # separate out functional outcomes by ;
+  separate(functional_outcome, into = c("outcome1", "outcome2", "outcome3"),
+             sep = ";",   
+             fill = "right",   
+             remove = FALSE) |> 
+  
+  # standardize formatting of functional outcomes
+  mutate(
+    outcome1 = recode(outcome1, 
+                         '(KOSCHI) King’s Outcome Scale for Childhood Head Injury score' = 'KOSCHI', 
+                         'Bayley Scales of Infant Development III' = 'Bayley III', 
+                         'Pediatric Stroke Outcome Measure (PSOM) ' = 'PSOM', 
+                         'Scales  for  Outcomes  in  PD  (SCOPA)' = "SCOPA", 
+                         "Unified  Huntington  Disease  Rating  Scale" = "UHDRS", 
+                         "UPDRS" = "UPDRS (composite)", 
+                         "Total motor scale (TMS)" = "TMS",
+                         "medical research council ( MRC) sum score" = "MRC sum score",
+                         "GBS disability score" = "GBS disability scale", 
+                         "GBS  disability  scale" = "GBS disability scale",
+                         "Pediatric Stroke Outcome Measure (PSOM)" = "PSOM", 
+                         "GOS" = "GOS (unextended)")
+  )  |>     
+  mutate(
+    outcome2 = recode(outcome2, 
+                      " Gross Motor Function Classification System (GMFCS)" = "GMFCS", 
+                      "UPDRS-III" = "UPDRS-III", 
+                      "MSSS" = "MSSS", 
+                      "mRS" = "mRS", 
+                      "NIHSS" = "NIHSS", 
+                      " PSOM" = "PSOM", 
+                      " total functional capacity (TFC)" = "TFC", 
+                      " UPDRS-III" = "UPDRS-III", 
+                      "Barthel Index" = "Barthel Index", 
+                      "ICARS" = "ICARS", 
+                      "mNIHSS" = "mNIHSS", 
+                      " NIHSS" = " NIHSS", 
+                      " Katz index" = "Katz index", 
+                      " Rasch- Built  Overall Built Disability Score" = "Rasch-Built Overall Built Disability Score", 
+                      " medical research council ( MRC) sum score" = "Medical Research Council (MRC) sum score", 
+                      " GDS" = "GDS", 
+                      "Multiple Sclerosis Severity Score (MSSS)" = "MSSS", 
+                      " PCPC" = " PCPC", 
+                      "Stroke Levity Scale" = "Stroke Levity Scale", 
+                      " SCIM 3" = "SCIM 3"),
+    outcome2 = if_else(
+      outcome2 == "", NA_character_, outcome2)
+    ) |> 
+  
+  mutate(
+    outcome3 = recode(outcome3,
+                      "INAS" = "INAS", 
+                      "Stroke Impact Scale 16" = "Stroke Impact Scale 16",
+                      "SIS-16" = "Stroke Impact Scale 16"), 
+     outcome3 = if_else(
+      outcome3 == "", NA_character_, outcome3)
+    ) |> 
+  
+  # standardize formatting of roc/auc variable
+  mutate(
+    roc_present = str_replace_all(
+      roc_present, ";", "")
+  ) |> 
+  
+  mutate(
+    roc_present = recode(
+      roc_present,
+      "AUC" = "auc", 
+      "AUCROC" = "auc_roc", 
+      "ROCAUC" = "auc_roc", 
+      "Neither" = "neither"), 
+    roc_present_bin = case_when(
+      roc_present == "auc" ~ "Yes", 
+      roc_present == "auc_roc" ~ "Yes",
+      roc_present == "neither" ~ "No")
+    ) |> 
+  
+  separate(
+    effect_estimate, 
+    into = c("effectmeasure1", 
+             "effectmeasure2", 
+             "effectmeasure3"),
+             sep = ";",   
+             fill = "right",   
+             remove = FALSE) |> 
+  # standardize formatting of effect estimate variable
+  mutate(
+    effectmeasure1 = recode(
+      effectmeasure1, 
+      "partial correlation r" = "Partial correlation r", 
+      "pearson correlation r" = "Pearson correlation r"), 
+    
+    effectmeasure2 = str_remove(effectmeasure2, "^ "), 
+    effectmeasure2 = recode(
+      effectmeasure2, 
+      "risk ratio" = "Risk ratio", 
+      "odds ratio" = "Odds ratio"), 
+    effectmeasure2 = if_else(
+      effectmeasure2 == "", NA_character_, effectmeasure2),
+    
+    effectmeasure3 = str_remove(effectmeasure3, "^ "), 
+    effectmeasure3 = if_else(
+      effectmeasure3 == "", NA_character_, effectmeasure3),
+    effectmeasure3 = recode(
+      effectmeasure3, 
+      "mean difference" = "Mean difference") 
+  ) |> 
+  
+  # create a binary variable for whether a row only contains a beta coefficient
+    mutate(
+    beta_only_bin = case_when(
+      effect_estimate == "Beta coefficient(s) only" ~ "Yes", 
+      effect_estimate == "Beta coefficient(s) only;" ~ "Yes",
+      TRUE ~ "No")
+  ) |> 
+  
+  # create a binary variable for whether an observation is in the primary sample or only overall sample
+  mutate(
+    refined_bin = case_when(
+      roc_present == "neither" & covariate_intent == "Yes" & beta_only_bin == "No" ~ "refined",
+      TRUE ~ "overall_only")
+  ) |> 
+  
+  mutate(
+    spbg_type_3cat = case_when(
+      spbg_present == "No" ~ "No Grotta bars",
+      contains_adj_spbg == "No" ~ "Unadjusted Grotta bars only", 
+      contains_adj_spbg == "Yes" ~ "Contains adjusted Grotta bars"),
+    spbg_type_3cat = fct_relevel(
+      spbg_type_3cat, 
+      "No Grotta bars", 
+      "Unadjusted Grotta bars only", 
+      "Contains adjusted Grotta bars")
+  ) |> 
+  
+
+  # remove unneeded variables
+  select(c("doi",
+           "condition1",
+           "condition2", 
+           "outcome1", 
+           "outcome2", 
+           "outcome3",
+           "spbg_present", 
+           "contains_adj_spbg", 
+           "spbg_type_3cat", 
+           "figure_other",
+           "roc_present", 
+           "roc_present_bin",
+           "covariate_intent", 
+           "effectmeasure1", 
+           "effectmeasure2", 
+           "effectmeasure3", 
+           "beta_only_bin", 
+           "refined_bin")
+         )
+
+```
+
+```{r}
+aucroc <-
+  dat_incl |> 
+  filter(roc_present_bin == "Yes") |> 
+  select(doi)
+
+beta_only <-
+  dat_incl |> 
+  filter(beta_only_bin == "Yes") |> 
+  select(doi)
+
+adj_confounding <-dat_incl |> 
+  filter(covariate_intent == "Yes") |> 
+  select(doi)
+```
+
+
+# Generate tables
+
+### Supplementary Table 1
+
+Table of neurological conditions in study populations
+
+```{r, echo = FALSE}
+# prepare dataset for neurological conditions
+
+dat_supptab1_conditions <- dat_incl |> 
+  pivot_longer(
+    cols = starts_with("condition"), 
+    names_to = "which_condition", 
+    values_to = "condition"
+  ) |> 
+  mutate(
+    refined_bin = recode(
+      refined_bin,
+      "overall_only" = "Overall", 
+      "refined" = "Refined"), 
+    
+    condition = recode(
+      condition, 
+      "acute myocardial infarction (AMI)" = "Acute myocardial infarction *", 
+      "spinocerebellar ataxia type 2 (SCA2)" = "Spinocerebellar ataxia type 2", 
+      "Inclusion body myositis (IBM)" = "Inclusion body myositis", 
+      "TBI" = "Traumatic brain injury †",
+      "Spinal Cord Injury" = "Spinal cord injury", 
+      "Hemorrhagic stroke" = "Stroke (hemorrhagic) †", 
+      "Ischemic stroke" = "Stroke (ischemic) *", 
+      "Stroke (all)" = "Stroke (hemorrhagic and ischemic)")
+    ) |> 
+  
+  filter(!is.na(condition)) |> 
+  
+  dplyr::rename(`Neurological condition` = `condition`) 
+
+footnote1 <- "* One occurrence of acute myocardial infarction and ischemic stroke in a combined population"
+footnote2 <- "† One occurrence of stroke (hemorrhagic) and traumatic brain injury in a combined population" 
+
+my.render.cat <- function(x) {
+  c("", sapply(stats.default(x), function(y) with(y,
+                                                  sprintf("%d (%0.0f%%)", FREQ, PCT))))
+}
+
+
+supp_tab1 <- table1(~ `Neurological condition` | spbg_type_3cat, data = dat_supptab1_conditions, 
+                    overall=c(left="Total"), 
+                    footnote = c(footnote1, footnote2), 
+                    render.categorical=my.render.cat)
+
+supp_tab1
+
+setwd("/Users/meghanforrest/Desktop/Research Projects/SPBG/SPBG-meta-research-study")
+t1flex(supp_tab1) %>% 
+  save_as_docx(path="supp_tab1.docx")
+
+
+
+```
+
+### Supplementary Table 2
+
+Table of functional outcomes identified in sample
+
+```{r, echo = FALSE}
+dat_supptab2_outcomes <- dat_incl |> 
+  pivot_longer(
+    cols = starts_with("outcome"), 
+    names_to = "which_outcome", 
+    values_to = "outcome") |> 
+  mutate(
+    outcome = recode(
+      outcome,
+      "mRS" = "Modified Rankin Scale", 
+      "GMFCS" = "Gross Motor Function Classification System", 
+      "UPDRS (composite)" = "Unified Parkinson's Disease Rating Scale (composite)", 
+      "UPDRS-III" = "Unified Parkinson's Disease Rating Scale-III", 
+      "NIHSS" = "National Institutes of Health Stroke Scale", 
+      "EDSS" = "Expanded Disability Status Scale", 
+      "MSSS" = "Multiple Sclerosis Severity Score", 
+      "PedNIHSS" = "National Institutes of Health Stroke Scale (pediatric)", 
+      "PSOM" = "Pediatric Stroke Outcome Measure", 
+      "TMS" = "The Unified Huntington's Disease Rating Scale ‐ Total Motor Score",
+      "TFC" = "The Unified Huntington's Disease Rating Scale ‐ Total Functional Capacity",
+      "SARA" = "Scale for Assessment and Rating of Ataxia",
+      "ICARS" = "International Cooperative Ataxia Rating Scale",
+      "INAS" = "Inventory of Non-Ataxia Signs",
+      "RS" = "Rankin Scale",
+      "mNIHSS" = "Modified National Institutes of Health Stroke Scale",
+      "GOS (unextended)" = "Glasgow Outcome Scale",
+      " NIHSS" = "National Institutes of Health Stroke Scale",
+      "Katz index" = "Katz Index",
+      "GOSE" = "Glasgow Outcome Scale - Extended",
+      "GBS disability scale" = "Guillain-Barré Syndrome Disability Scale",
+      "Medical Research Council (MRC) sum score" = "Medical Research Council Sum Score",
+      "I-RODS" = "Inflammatory Rasch-Built Overall Disability Scale",
+      "GDS" = "Guillain-Barré Syndrome Disability Scale",
+      "WIDEA-FS" = "The Warner Initial Developmental Evaluation of Adaptive and Functional Skills",
+      "KOSCHI" = "King's Outcome Scale for Childhood Head Injury",
+      "UHDRS" = "Unified Huntington's Disease Rating Scale",
+      "SCOPA" = "Scales for Outcomes in Parkinson's Disease",
+      "GOS-E-Peds" = "Glasgow Outcome Scale - Extended (pediatric)",
+      " PCPC" = "Pediatric Cerebral Performance Category Scale",
+      "IBMFRS" = "Inclusion Body Myositis-Functional Rating Scale",
+      "UW-mRS" = "Utility-Weighted Modified Rankin Scale",
+      "ISNCSCI" = "International Standards for Neurological Classification of Spinal Cord Injury",
+      "SCIM 3" = "Spinal Cord Independence Measure, Version III",
+      "Ped-MSSS" = "Multiple Sclerosis Severity Score (pediatric)")
+  ) |> 
+  filter(!is.na(outcome)) |> 
+  
+  dplyr::rename(`Functional outcome` = `outcome`) 
+  
+
+
+my.render.cat <- function(x) {
+  c("", sapply(stats.default(x), function(y) with(y,
+                                                  sprintf("%d (%0.0f%%)", FREQ, PCT))))
+}
+
+supp_tab2 <- table1(~ `Functional outcome`,  data = dat_supptab2_outcomes, 
+                    overall=c(left="Total"), 
+                    render.categorical=my.render.cat)
+supp_tab2
+
+setwd("/Users/meghanforrest/Desktop/Research Projects/SPBG/SPBG-meta-research-study")
+t1flex(supp_tab2) %>% 
+  save_as_docx(path="supp_tab2.docx")
+```
+

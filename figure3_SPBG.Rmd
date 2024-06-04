@@ -273,7 +273,7 @@ positions_stroke <- c("Other *", "Stroke")
 
 
 barplot_allneuro <- ggplot(barplot_data_stroke, aes(x= neuropathology, fill = any_figure_contains)) + 
-  geom_bar(width = 0.4) + 
+  geom_bar(width = 0.5) + 
   scale_x_discrete(limits = positions_stroke) +
   scale_fill_manual(values = c("#4773a3",  "#a4c3d7", "#FFE082", "grey93"), 
                     limits = c("Adjusted SPBG", "Unadjusted SPBG", "Other figure (No SPBG)", "No figure")) +
@@ -303,9 +303,10 @@ barplot_allneuro <- ggplot(barplot_data_stroke, aes(x= neuropathology, fill = an
   geom_text(
     stat= 'count' , aes(label=..count..), 
             position = position_stack(vjust = .5), 
-            size = 2.5, 
-            color = 'grey16') +
-  annotate("text", x = 2, y = 203, label = "n = 192", size = 3) +
+            size = 3, 
+            color = 'black') +
+  annotate("text", x = 2, y = 203, label = "n = 192", size = 3
+           ) +
   annotate("text", x = 1, y = 70, label = "n = 60", size = 3)
 
 barplot_allneuro

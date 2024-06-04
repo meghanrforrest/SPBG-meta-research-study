@@ -1,11 +1,9 @@
 ---
 title: "Grotta Bar, Figure 1 SPBG Manuscript"
 author: "Meghan Forrest"
-format: pdf
+format: pdf_document
 editor: visual
 ---
-
-
 
 ```{r}
 # load packages
@@ -17,8 +15,15 @@ library(RColorBrewer)
 grotta_dat <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/figure1_dataset.csv")) %>% 
   select(!"participant") 
 
+grotta_dat <- grotta_dat |> 
+  mutate(
+    dc_status = case_when(
+      dc_status == "Not discharged home" ~ "Discharged elsewhere", 
+      dc_status == "Discharged home" ~ "Discharged home"))
+
 grotta_dat$dc_status <- factor(grotta_dat$dc_status, 
-                               levels = c("Not discharged home", "Discharged home"))
+                               levels = c("Discharged elsewhere",
+                                          "Discharged home"))
 
 grotta_dat$adj <- factor(grotta_dat$adj, 
                          levels = c("unadjusted", "adjusted"))
@@ -26,7 +31,7 @@ grotta_dat$adj <- factor(grotta_dat$adj,
 grotta_dat <-
   grotta_dat %>% 
   mutate(adj = case_when(
-         adj == "adjusted" ~ "Adjusted using Inverse Probability of Treatment Weighting", 
+         adj == "adjusted" ~ "Adjusted Using Inverse Probability Weighting", 
          adj == "unadjusted" ~ "Unadjusted"))
 
 
@@ -38,7 +43,7 @@ grotta_dat_dc_unadj <-
 
 grotta_dat_notdc_unadj <-
   grotta_dat %>% 
-  filter(dc_status == "Not discharged home")
+  filter(dc_status == "Discharged elsewhere")
 
 table(grotta_dat_notdc_unadj$mrs)
 
@@ -48,7 +53,13 @@ table(grotta_dat_notdc_unadj$mrs)
 
 x <- table( mRS = grotta_dat$mrs,  Group = grotta_dat$dc_status, adjustment = grotta_dat$adj)
 
-custom_colors <- c("#1A4A7C", "#4773a3", "#a4c3d7", "#FFE082", "#F4A582", "#E0815A", "#B2182B")
+custom_colors <- c("#1A4A7C", 
+                   "#4773a3", 
+                   "#a4c3d7", 
+                   "#FFE082", 
+                   "#F4A582", 
+                   "#E0815A", 
+                   "#B2182B")
 
 grottaBar(x, 
           groupName = "Group", 
@@ -60,32 +71,6 @@ grottaBar(x,
           lineSize = 0.2,
           colorScheme = "custom") + scale_fill_manual(values = custom_colors)
 
-```
-
-```{r}
-start_color <- "#003366"
-end_color <- "#4773a3"
-
-# Create a color palette with 7 colors
-num_colors <- 20
-color_palette <- colorRampPalette(c(start_color, end_color))(num_colors)
-
-print(color_palette)
-
+ggsave("spbg_figure1.png")
 
 ```
-```{r}
- [1] "#003366" "#033669" "#07396C" "#0B3D6F" "#0E4072" "#124376"
- [7] "#164779" "#1A4A7C" "#1D4D7F" "#215182" "#255486" "#295889"
-[13] "#2C5B8C" "#305E8F" "#346292" "#386596" "#3B6899" "#3F6C9C"
-[19] "#436F9F" "#4773A3" 
-
- [1] "#003366" "#0D3C67" "#1A4568" "#284E6A" "#35576B" "#43606D"
- [7] "#50696E" "#5D7270" "#6B7B71" "#788473" "#868E74" "#939776"
-[13] "#A1A077" "#AEA979" "#BBB27A" "#C9BB7C" "#D6C47D" "#E4CD7F"
-[19] "#F1D680" "#FFE082"
-
- [1] "#D6604D" "#D8664F" "#DA6D52" "#DC7455" "#DE7A58" "#E0815A"
- [7] "#E2885D" "#E58F60" "#E79563" "#E99C66" "#EBA368" "#EDAA6B"
-[13] "#EFB06E" "#F2B771" "#F4BE74" "#F6C576" "#F8CB79" "#FAD27C"
-[19] "#FCD97F" "#FFE082"
