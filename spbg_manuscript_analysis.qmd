@@ -1,12 +1,12 @@
 ---
-title: "Tables"
+title: "SPBG Analysis"
 author: "Meghan Forrest"
-date: "2024-03-02"
+date: "2023-04-11"
 output:
-  html_document:
-    df_print: paged
   pdf_document: default
-classoption: landscape
+editor_options:
+  markdown:
+    wrap: 72
 ---
 
 ```{r setup, include=FALSE}
@@ -25,15 +25,17 @@ library(forcats)
 library(patchwork)
 library(grid)
 library(table1)
-library(flextable)
-library(magrittr)
 
 Abstraction_master <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/Abstraction_master.csv"))
+
+
+
+    
 ```
 
 # Import dataset and restructure.
 
-```{r, echo = FALSE}
+```{r}
 
 # filter for only included studies
 
@@ -52,7 +54,21 @@ dat_incl <- Abstraction_master |>
       spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "No" ~ 4, 
       spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "Yes" ~ 5)) |>
   
-  # create variable for records which contain an ADJUSTED spbg
+  # create variable for studies with a stratified spbg
+  
+  mutate(
+    spbg_stratified = case_when(
+      spbg_present == "Yes" & c(stratified_1 == "Yes" | stratified_2 == "Yes" | stratified_3 == "Yes" | stratified_4 == "Yes" | stratified_5 == "Yes") ~ "Yes",
+      spbg_present == "No" ~ NA, 
+      spbg_count == 1 & stratified_1 == "No" ~ "No",
+      spbg_count == 2 & c(stratified_1 == "No" & stratified_2 == "No") ~ "No", 
+      spbg_count == 3 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No") ~ "No",
+      spbg_count == 4 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No" & stratified_4 == "No") ~ "No",
+      spbg_count == 5 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No" & stratified_4 == "No" & stratified_5 == "No") ~ "No")
+    ) |> 
+  
+  
+  # create variable for records which contain an model-adjusted spbg
   mutate(
     contains_adj_spbg = case_when(
       spbg_present == "Yes" & c(adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes") ~ "Yes", 
@@ -154,11 +170,7 @@ dat_incl <- Abstraction_master |>
       "AUC" = "auc", 
       "AUCROC" = "auc_roc", 
       "ROCAUC" = "auc_roc", 
-      "Neither" = "neither"), 
-    roc_present_bin = case_when(
-      roc_present == "auc" ~ "Yes", 
-      roc_present == "auc_roc" ~ "Yes",
-      roc_present == "neither" ~ "No")
+      "Neither" = "neither")
     ) |> 
   
   separate(
@@ -218,6 +230,8 @@ dat_incl <- Abstraction_master |>
       "Unadjusted Grotta bars only", 
       "Contains adjusted Grotta bars")
   ) |> 
+
+  
   
 
   # remove unneeded variables
@@ -228,11 +242,16 @@ dat_incl <- Abstraction_master |>
            "outcome2", 
            "outcome3",
            "spbg_present", 
+           "spbg_stratified",
+           "stratified_1", 
+           "stratified_2", 
+           "stratified_3", 
+           "stratified_4", 
+           "stratified_5",
            "contains_adj_spbg", 
            "spbg_type_3cat", 
            "figure_other",
            "roc_present", 
-           "roc_present_bin",
            "covariate_intent", 
            "effectmeasure1", 
            "effectmeasure2", 
@@ -243,30 +262,13 @@ dat_incl <- Abstraction_master |>
 
 ```
 
-```{r}
-aucroc <-
-  dat_incl |> 
-  filter(roc_present_bin == "Yes") |> 
-  select(doi)
-
-beta_only <-
-  dat_incl |> 
-  filter(beta_only_bin == "Yes") |> 
-  select(doi)
-
-adj_confounding <-dat_incl |> 
-  filter(covariate_intent == "Yes") |> 
-  select(doi)
-```
-
-
 # Generate tables
 
 ### Supplementary Table 1
 
 Table of neurological conditions in study populations
 
-```{r, echo = FALSE}
+```{r}
 # prepare dataset for neurological conditions
 
 dat_supptab1_conditions <- dat_incl |> 
@@ -305,7 +307,6 @@ my.render.cat <- function(x) {
                                                   sprintf("%d (%0.0f%%)", FREQ, PCT))))
 }
 
-
 supp_tab1 <- table1(~ `Neurological condition` | spbg_type_3cat, data = dat_supptab1_conditions, 
                     overall=c(left="Total"), 
                     footnote = c(footnote1, footnote2), 
@@ -313,19 +314,13 @@ supp_tab1 <- table1(~ `Neurological condition` | spbg_type_3cat, data = dat_supp
 
 supp_tab1
 
-setwd("/Users/meghanforrest/Desktop/Research Projects/SPBG/SPBG-meta-research-study")
-t1flex(supp_tab1) %>% 
-  save_as_docx(path="supp_tab1.docx")
-
-
-
 ```
 
 ### Supplementary Table 2
 
 Table of functional outcomes identified in sample
 
-```{r, echo = FALSE}
+```{r}
 dat_supptab2_outcomes <- dat_incl |> 
   pivot_longer(
     cols = starts_with("outcome"), 
@@ -381,13 +376,220 @@ my.render.cat <- function(x) {
                                                   sprintf("%d (%0.0f%%)", FREQ, PCT))))
 }
 
-supp_tab2 <- table1(~ `Functional outcome`,  data = dat_supptab2_outcomes, 
+supp_tab2 <- table1(~ `Functional outcome` | spbg_type_3cat, data = dat_supptab2_outcomes, 
                     overall=c(left="Total"), 
                     render.categorical=my.render.cat)
-supp_tab2
 
-setwd("/Users/meghanforrest/Desktop/Research Projects/SPBG/SPBG-meta-research-study")
-t1flex(supp_tab2) %>% 
-  save_as_docx(path="supp_tab2.docx")
+supp_tab2
+```
+
+# Generate barplots
+
+#### Prepare a dataset for barplots
+
+```{r}
+dat_graphs <- dat_incl |> 
+  mutate(
+    any_figure_contains = case_when(
+     spbg_present == "Yes" & contains_adj_spbg == "No" & spbg_stratified == "No" ~ "Grotta bar(s) - all unadjusted", 
+     spbg_present == "Yes" & contains_adj_spbg == "No" & spbg_stratified == "Yes" ~ "Grotta bar(s) - stratified", 
+     contains_adj_spbg == "Yes" ~ "Grotta bar(s) with adjustment", 
+     
+     figure_other == "Yes" & spbg_present == "No" ~ "Non-Grotta bar figures only", 
+     figure_other == "No" & spbg_present == "No" ~ "No figures"),
+
+  # brush up the names of the neurological conditions
+    condition1 = recode(
+      condition1,
+      "Ischemic stroke" = "Stroke", 
+      "Hemorrhagic stroke" = "Stroke", 
+      "Stroke (all)" = "Stroke")) |> 
+  
+  # make the records with two populations into their own observation
+  pivot_longer(
+    names_to = "which_condition", 
+    values_to = "neuropathology", 
+    cols = condition1:condition2) |> 
+  
+filter(neuropathology != "") |> 
+  select(!"which_condition") |> 
+  
+  # clean up names of neuropathologies
+  mutate(neuropathology = recode(neuropathology,
+      "Stroke (all)" = "Stroke (all)", 
+      "encephalitis" = "Encephalitis", 
+      "GBS" = "Guillain-Barré", 
+      "Huntington disease" = "Huntington’s disease", 
+      "Huntington Disease" = "Huntington’s disease")
+      ) |>
+  
+  # relevel the any_figure_contains variable
+  mutate(
+    any_figure_contains = recode(
+      any_figure_contains, 
+      "No figure" = "No figures", 
+      "Other figure (No SPBG)" = "Non-Grotta bar figures only", 
+      "Unadjusted SPBG" = "Grotta bar(s) - all unadjusted", 
+      "Adjusted SPBG" = "Grotta bar(s) with adjustment"
+    ),
+    any_figure_contains = fct_relevel(any_figure_contains,
+                                      "No figures",
+                                      "Non-Grotta bar figures only", 
+                                      "Grotta bar(s) - all unadjusted",
+                                      "Grotta bar(s) - stratified only",
+                                      "Grotta bar(s) with model adjustment"), 
+    any_figure_contains = recode(any_figure_contains, 
+                                 "SPBG" = "Stacked proportional bar graph"))
+```
+
+mutate( any_figure_contains = recode( any_figure_contains, "SPBG" =
+"Stacked proportional bar graph"))
+
+```{r}
+
+#set up a dataframe for the "Stroke v. Other" barplot
+
+dat_barplot_stroke <- dat_graphs |> 
+  mutate(
+    neuropathology = fct_other(neuropathology, keep = "Stroke", 
+                                    other_level = "Other *"), 
+    neuropathology = fct_relevel(neuropathology, "Stroke", "Other *"))
+
+barplot_stroke <- ggplot(dat_barplot_stroke, 
+                         aes(x= neuropathology, 
+                             fill = any_figure_contains)) + 
+  geom_bar(width = 0.25, 
+           color = "white", 
+           alpha = 0.8) + 
+  
+  coord_flip() +
+  
+  scale_fill_manual(values = c("#a02322",
+                               "#eb807d",
+                               "#f9ccc9",
+                               "#90ACB4",
+                               "#d9dddf"),
+                    limits = c("Grotta bar(s) with adjustment", 
+                               "Grotta bar(s) - stratified",
+                               "Grotta bar(s) - all unadjusted",
+                               "Non-Grotta bar figures only",
+                               "No figures")) +
+  
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(), 
+    panel.grid.minor.y = element_blank(), 
+    panel.grid.minor = element_blank(),
+    axis.text.y = element_blank(),
+    
+    legend.title=element_blank(),
+    legend.key.size = unit(1, 'cm'),
+        legend.key.height = unit(.3, 'cm'),
+        legend.key.width = unit(.35, 'cm'),
+        legend.text = element_text(size = 9), 
+    legend.position = c(0.5, 1.0),
+    legend.direction="horizontal",
+    
+    axis.ticks = element_blank(), 
+    
+    axis.title.y=element_blank(), 
+    
+
+    plot.margin = unit(c(0.8,1,0,0), "cm")) +
+  geom_text(
+    stat= 'count' , aes(label=..count..), 
+            position = position_stack(vjust = .5), 
+            size = 3, 
+            color = 'black') +
+  annotate("text", x = 2, y = 215, label = "Total = 192", size = 3, fontface = "bold"
+           ) +
+  annotate("text", x = 1, y = 83, label = "Total = 60", size = 3, fontface = "bold") +
+  annotate("text", x = 2.23, y = 74, label = "Papers in the sample with a stroke population", size = 4, fontface = "bold") +
+  annotate("text", x = 1.23, y = 80, label = "Papers in the sample with a non-stroke population", size = 4, fontface = "bold") +
+  scale_y_continuous(limits = c(0, 250)) + 
+  labs(y = "Number of Papers")
+
+barplot_stroke
+
+barplot_stroke2 + theme(panel.spacing = unit(0.5, "lines"))
+
+ggsave("figure3.png")
+
+
+
+
+
+barplot_stroke_legend <- ggplot(dat_barplot_stroke, 
+                         aes(x= neuropathology, 
+                             fill = any_figure_contains)) + 
+  geom_bar(width = 0.25, 
+           color = "white", 
+           alpha = 0.8) + 
+  
+  coord_flip() +
+  
+  scale_fill_manual(values = c("#a02322",
+                               "#eb807d",
+                               "#f9ccc9",
+                               "#90ACB4",
+                               "#d9dddf"),
+                    limits = c("Grotta bar(s) - model-based adjustment", 
+                               "Grotta bar(s) - stratified",
+                               "Grotta bar(s) - unadjusted",
+                               "Non-Grotta bar figures only",
+                               "No figures")) +
+  
+  theme_minimal() +
+  theme(
+    panel.grid.major.y = element_blank(), 
+    panel.grid.minor.y = element_blank(), 
+    panel.grid.minor = element_blank(),
+    axis.text.y = element_blank(),
+    
+    legend.title=element_blank(),
+    legend.key.size = unit(1, 'cm'),
+        legend.key.height = unit(.3, 'cm'),
+        legend.key.width = unit(.35, 'cm'),
+        legend.text = element_text(size = 9),
+    
+    axis.ticks = element_blank(), 
+    
+    axis.title.y=element_blank(), 
+    
+
+    plot.margin = unit(c(0.8,1,0,0), "cm")) +
+  geom_text(
+    stat= 'count' , aes(label=..count..), 
+            position = position_stack(vjust = .5), 
+            size = 3, 
+            color = 'black') +
+  annotate("text", x = 2, y = 215, label = "Total = 192", size = 3, fontface = "bold"
+           ) +
+  annotate("text", x = 1, y = 83, label = "Total = 60", size = 3, fontface = "bold") +
+  annotate("text", x = 2.23, y = 74, label = "Papers in the sample with a stroke population", size = 4, fontface = "bold") +
+  annotate("text", x = 1.23, y = 80, label = "Papers in the sample with a non-stroke population", size = 4, fontface = "bold") +
+  scale_y_continuous(limits = c(0, 250)) + 
+  labs(y = "Number of Papers")
+
+barplot_stroke_legend
+
+barplot_stroke_legend + theme(panel.spacing = unit(0.5, "lines"))
+
+ggsave("figure3_legend.png")
+
+getwd()
+
+```
+
+
+Facet plot
+```{r}
+
+ggplot(dat_barplot_stroke, 
+         aes(any_figure_contains)) + 
+  geom_bar() + 
+  facet_wrap(~neuropathology) +
+  coord_flip()
+
 ```
 
