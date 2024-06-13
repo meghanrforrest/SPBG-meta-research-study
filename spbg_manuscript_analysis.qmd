@@ -1,5 +1,5 @@
 ---
-title: "SPBG Analysis"
+title: "Untitled"
 author: "Meghan Forrest"
 date: "2023-04-11"
 output:
@@ -27,11 +27,8 @@ library(grid)
 library(table1)
 
 Abstraction_master <- read.csv(file = url("https://raw.githubusercontent.com/meghanrforrest/SPBG-meta-research-study/main/Abstraction_master.csv"))
-
-
-
-    
 ```
+
 
 # Import dataset and restructure.
 
@@ -43,8 +40,7 @@ dat_incl <- Abstraction_master |>
   filter(eligiblity == "Yes") |> 
   
   
-  # create variable for spbg count per study  
-  
+# create variable for spbg count per study  
   mutate(
     spbg_count = case_when(
       spbg_present == "No" ~ 0, 
@@ -54,8 +50,61 @@ dat_incl <- Abstraction_master |>
       spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "No" ~ 4, 
       spbg_present == "Yes" & additional_spbg_1 == "Yes" & additional_spbg_2 == "Yes" & additional_spbg_3 == "Yes" & additional_spbg_4 == "Yes" ~ 5)) |>
   
-  # create variable for studies with a stratified spbg
+# recode "unadjusted" to exclude those graphs that are stratified
+  mutate(
+    unadjusted_1 = case_when(
+      unadjusted_1 == "Yes" & stratified_1 == "No" & adjusted_1 == "No" ~ "Yes", 
+      unadjusted_1 == "Yes" & stratified_1 == "No" & adjusted_1 == "Yes" ~ "invalid",
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "invalid",
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "No" ~ "No",
+      unadjusted_1 == "No" & stratified_1 == "No" & adjusted_1 == "No" ~ "invalid", 
+      unadjusted_1 == "No" & stratified_1 == "Yes" & adjusted_1 == "No" ~ "No", 
+      unadjusted_1 == "No" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "No",
+      unadjusted_1 == "No" & stratified_1 == "No" & adjusted_1 == "Yes" ~ "No", 
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "invalid"), 
+    unadjusted_2 = case_when(
+      unadjusted_2 == "Yes" & stratified_2 == "No" & adjusted_2 == "No" ~ "Yes", 
+      unadjusted_2 == "Yes" & stratified_2 == "No" & adjusted_2 == "Yes" ~ "invalid",
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "invalid",
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "No" ~ "No",
+      unadjusted_2 == "No" & stratified_2 == "No" & adjusted_2 == "No" ~ "invalid", 
+      unadjusted_2 == "No" & stratified_2 == "Yes" & adjusted_2 == "No" ~ "No", 
+      unadjusted_2 == "No" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "No",
+      unadjusted_2 == "No" & stratified_2 == "No" & adjusted_2 == "Yes" ~ "No", 
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "invalid"),
+    unadjusted_3 = case_when(
+      unadjusted_3 == "Yes" & stratified_3 == "No" & adjusted_3 == "No" ~ "Yes", 
+      unadjusted_3 == "Yes" & stratified_3 == "No" & adjusted_3 == "Yes" ~ "invalid",
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "invalid",
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "No" ~ "No",
+      unadjusted_3 == "No" & stratified_3 == "No" & adjusted_3 == "No" ~ "invalid", 
+      unadjusted_3 == "No" & stratified_3 == "Yes" & adjusted_3 == "No" ~ "No", 
+      unadjusted_3 == "No" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "No",
+      unadjusted_3 == "No" & stratified_3 == "No" & adjusted_3 == "Yes" ~ "No", 
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "invalid"),
+    unadjusted_4 = case_when(
+      unadjusted_4 == "Yes" & stratified_4 == "No" & adjusted_4 == "No" ~ "Yes", 
+      unadjusted_4 == "Yes" & stratified_4 == "No" & adjusted_4 == "Yes" ~ "invalid",
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "invalid",
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "No" ~ "No",
+      unadjusted_4 == "No" & stratified_4 == "No" & adjusted_4 == "No" ~ "invalid", 
+      unadjusted_4 == "No" & stratified_4 == "Yes" & adjusted_4 == "No" ~ "No", 
+      unadjusted_4 == "No" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "No",
+      unadjusted_4 == "No" & stratified_4 == "No" & adjusted_4 == "Yes" ~ "No", 
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "invalid"),
+    unadjusted_5 = case_when(
+      unadjusted_5 == "Yes" & stratified_5 == "No" & adjusted_5 == "No" ~ "Yes", 
+      unadjusted_5 == "Yes" & stratified_5 == "No" & adjusted_5 == "Yes" ~ "invalid",
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "invalid",
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "No" ~ "No",
+      unadjusted_5 == "No" & stratified_5 == "No" & adjusted_5 == "No" ~ "invalid", 
+      unadjusted_5 == "No" & stratified_5 == "Yes" & adjusted_5 == "No" ~ "No", 
+      unadjusted_5 == "No" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "No",
+      unadjusted_5 == "No" & stratified_5 == "No" & adjusted_5 == "Yes" ~ "No", 
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "invalid")
+    ) |> 
   
+  # create variable for studies with a stratified spbg
   mutate(
     spbg_stratified = case_when(
       spbg_present == "Yes" & c(stratified_1 == "Yes" | stratified_2 == "Yes" | stratified_3 == "Yes" | stratified_4 == "Yes" | stratified_5 == "Yes") ~ "Yes",
@@ -67,8 +116,7 @@ dat_incl <- Abstraction_master |>
       spbg_count == 5 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No" & stratified_4 == "No" & stratified_5 == "No") ~ "No")
     ) |> 
   
-  
-  # create variable for records which contain an model-adjusted spbg
+# create variable for records which contain an model-adjusted spbg
   mutate(
     contains_adj_spbg = case_when(
       spbg_present == "Yes" & c(adjusted_1 == "Yes" | adjusted_2 == "Yes" | adjusted_3 == "Yes" | adjusted_4 == "Yes" | adjusted_5 == "Yes") ~ "Yes", 
@@ -80,6 +128,29 @@ dat_incl <- Abstraction_master |>
       spbg_count == 5 & c(adjusted_1 == "No" & adjusted_2 == "No" & adjusted_3 == "No" & adjusted_4 == "No" & adjusted_5 == "No") ~ "No")
     ) |> 
   
+# create variable for records which contain a strataified spbg
+  mutate(
+    contains_strat_spbg = case_when(
+      spbg_present == "Yes" & c(stratified_1 == "Yes" | stratified_2 == "Yes" | stratified_3 == "Yes" | stratified_4 == "Yes" | stratified_5 == "Yes") ~ "Yes", 
+      spbg_present == "No" ~ NA, 
+      spbg_count == 1 & stratified_1 == "No" ~ "No",
+      spbg_count == 2 & c(stratified_1 == "No" & stratified_2 == "No") ~ "No", 
+      spbg_count == 3 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No") ~ "No",
+      spbg_count == 4 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No" & stratified_4 == "No") ~ "No",
+      spbg_count == 5 & c(stratified_1 == "No" & stratified_2 == "No" & stratified_3 == "No" & stratified_4 == "No" & stratified_5 == "No") ~ "No")
+    ) |> 
+
+# create variable for records which contain an unadjusted spbg
+  mutate(
+    contains_unadj_spbg = case_when(
+      spbg_present == "Yes" & c(unadjusted_1 == "Yes" | unadjusted_2 == "Yes" | unadjusted_3 == "Yes" | unadjusted_4 == "Yes" | unadjusted_5 == "Yes") ~ "Yes", 
+      spbg_present == "No" ~ NA, 
+      spbg_count == 1 & unadjusted_1 == "No" ~ "No",
+      spbg_count == 2 & c(unadjusted_1 == "No" & unadjusted_2 == "No") ~ "No", 
+      spbg_count == 3 & c(unadjusted_1 == "No" & unadjusted_2 == "No" & unadjusted_3 == "No") ~ "No",
+      spbg_count == 4 & c(unadjusted_1 == "No" & unadjusted_2 == "No" & unadjusted_3 == "No" & unadjusted_4 == "No") ~ "No",
+      spbg_count == 5 & c(unadjusted_1 == "No" & unadjusted_2 == "No" & unadjusted_3 == "No" & unadjusted_4 == "No" & unadjusted_5 == "No") ~ "No")
+    ) |> 
 
   
   # separate out neurological conditions by ;
@@ -219,186 +290,81 @@ dat_incl <- Abstraction_master |>
       TRUE ~ "overall_only")
   ) |> 
   
+  # recode "unadjusted" to exclude those graphs that are stratified
   mutate(
-    spbg_type_3cat = case_when(
-      spbg_present == "No" ~ "No Grotta bars",
-      contains_adj_spbg == "No" ~ "Unadjusted Grotta bars only", 
-      contains_adj_spbg == "Yes" ~ "Contains adjusted Grotta bars"),
-    spbg_type_3cat = fct_relevel(
-      spbg_type_3cat, 
-      "No Grotta bars", 
-      "Unadjusted Grotta bars only", 
-      "Contains adjusted Grotta bars")
-  ) |> 
+    unadjusted_1_recode = case_when(
+      unadjusted_1 == "Yes" & stratified_1 == "No" & adjusted_1 == "No" ~ "Yes", 
+      unadjusted_1 == "Yes" & stratified_1 == "No" & adjusted_1 == "Yes" ~ "invalid",
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "invalid",
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "No" ~ "No",
+      unadjusted_1 == "No" & stratified_1 == "No" & adjusted_1 == "No" ~ "invalid", 
+      unadjusted_1 == "No" & stratified_1 == "Yes" & adjusted_1 == "No" ~ "No", 
+      unadjusted_1 == "No" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "No",
+      unadjusted_1 == "No" & stratified_1 == "No" & adjusted_1 == "Yes" ~ "No", 
+      unadjusted_1 == "Yes" & stratified_1 == "Yes" & adjusted_1 == "Yes" ~ "invalid"), 
+    unadjusted_2_recode = case_when(
+      unadjusted_2 == "Yes" & stratified_2 == "No" & adjusted_2 == "No" ~ "Yes", 
+      unadjusted_2 == "Yes" & stratified_2 == "No" & adjusted_2 == "Yes" ~ "invalid",
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "invalid",
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "No" ~ "No",
+      unadjusted_2 == "No" & stratified_2 == "No" & adjusted_2 == "No" ~ "invalid", 
+      unadjusted_2 == "No" & stratified_2 == "Yes" & adjusted_2 == "No" ~ "No", 
+      unadjusted_2 == "No" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "No",
+      unadjusted_2 == "No" & stratified_2 == "No" & adjusted_2 == "Yes" ~ "No", 
+      unadjusted_2 == "Yes" & stratified_2 == "Yes" & adjusted_2 == "Yes" ~ "invalid"),
+    unadjusted_3_recode = case_when(
+      unadjusted_3 == "Yes" & stratified_3 == "No" & adjusted_3 == "No" ~ "Yes", 
+      unadjusted_3 == "Yes" & stratified_3 == "No" & adjusted_3 == "Yes" ~ "invalid",
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "invalid",
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "No" ~ "No",
+      unadjusted_3 == "No" & stratified_3 == "No" & adjusted_3 == "No" ~ "invalid", 
+      unadjusted_3 == "No" & stratified_3 == "Yes" & adjusted_3 == "No" ~ "No", 
+      unadjusted_3 == "No" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "No",
+      unadjusted_3 == "No" & stratified_3 == "No" & adjusted_3 == "Yes" ~ "No", 
+      unadjusted_3 == "Yes" & stratified_3 == "Yes" & adjusted_3 == "Yes" ~ "invalid"),
+    unadjusted_4_recode = case_when(
+      unadjusted_4 == "Yes" & stratified_4 == "No" & adjusted_4 == "No" ~ "Yes", 
+      unadjusted_4 == "Yes" & stratified_4 == "No" & adjusted_4 == "Yes" ~ "invalid",
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "invalid",
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "No" ~ "No",
+      unadjusted_4 == "No" & stratified_4 == "No" & adjusted_4 == "No" ~ "invalid", 
+      unadjusted_4 == "No" & stratified_4 == "Yes" & adjusted_4 == "No" ~ "No", 
+      unadjusted_4 == "No" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "No",
+      unadjusted_4 == "No" & stratified_4 == "No" & adjusted_4 == "Yes" ~ "No", 
+      unadjusted_4 == "Yes" & stratified_4 == "Yes" & adjusted_4 == "Yes" ~ "invalid"),
+    unadjusted_5_recode = case_when(
+      unadjusted_5 == "Yes" & stratified_5 == "No" & adjusted_5 == "No" ~ "Yes", 
+      unadjusted_5 == "Yes" & stratified_5 == "No" & adjusted_5 == "Yes" ~ "invalid",
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "invalid",
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "No" ~ "No",
+      unadjusted_5 == "No" & stratified_5 == "No" & adjusted_5 == "No" ~ "invalid", 
+      unadjusted_5 == "No" & stratified_5 == "Yes" & adjusted_5 == "No" ~ "No", 
+      unadjusted_5 == "No" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "No",
+      unadjusted_5 == "No" & stratified_5 == "No" & adjusted_5 == "Yes" ~ "No", 
+      unadjusted_5 == "Yes" & stratified_5 == "Yes" & adjusted_5 == "Yes" ~ "invalid")
+  )
 
   
   
 
-  # remove unneeded variables
-  select(c("doi",
-           "condition1",
-           "condition2", 
-           "outcome1", 
-           "outcome2", 
-           "outcome3",
-           "spbg_present", 
-           "spbg_stratified",
-           "stratified_1", 
-           "stratified_2", 
-           "stratified_3", 
-           "stratified_4", 
-           "stratified_5",
-           "contains_adj_spbg", 
-           "spbg_type_3cat", 
-           "figure_other",
-           "roc_present", 
-           "covariate_intent", 
-           "effectmeasure1", 
-           "effectmeasure2", 
-           "effectmeasure3", 
-           "beta_only_bin", 
-           "refined_bin")
-         )
+
 
 ```
 
-# Generate tables
 
-### Supplementary Table 1
 
-Table of neurological conditions in study populations
-
+Lengthen dataset for dual-pathology populations
 ```{r}
-# prepare dataset for neurological conditions
 
-dat_supptab1_conditions <- dat_incl |> 
-  pivot_longer(
-    cols = starts_with("condition"), 
-    names_to = "which_condition", 
-    values_to = "condition"
-  ) |> 
+
+x <- Abstraction_master |> 
+  filter(spbg_present == "No") |> 
+  filter(figure_other == "Yes") 
+
+
+dat_analysis <- dat_incl |> 
+
   mutate(
-    refined_bin = recode(
-      refined_bin,
-      "overall_only" = "Overall", 
-      "refined" = "Refined"), 
-    
-    condition = recode(
-      condition, 
-      "acute myocardial infarction (AMI)" = "Acute myocardial infarction *", 
-      "spinocerebellar ataxia type 2 (SCA2)" = "Spinocerebellar ataxia type 2", 
-      "Inclusion body myositis (IBM)" = "Inclusion body myositis", 
-      "TBI" = "Traumatic brain injury †",
-      "Spinal Cord Injury" = "Spinal cord injury", 
-      "Hemorrhagic stroke" = "Stroke (hemorrhagic) †", 
-      "Ischemic stroke" = "Stroke (ischemic) *", 
-      "Stroke (all)" = "Stroke (hemorrhagic and ischemic)")
-    ) |> 
-  
-  filter(!is.na(condition)) |> 
-  
-  dplyr::rename(`Neurological condition` = `condition`) 
-
-footnote1 <- "* One occurrence of acute myocardial infarction and ischemic stroke in a combined population"
-footnote2 <- "† One occurrence of stroke (hemorrhagic) and traumatic brain injury in a combined population" 
-
-my.render.cat <- function(x) {
-  c("", sapply(stats.default(x), function(y) with(y,
-                                                  sprintf("%d (%0.0f%%)", FREQ, PCT))))
-}
-
-supp_tab1 <- table1(~ `Neurological condition` | spbg_type_3cat, data = dat_supptab1_conditions, 
-                    overall=c(left="Total"), 
-                    footnote = c(footnote1, footnote2), 
-                    render.categorical=my.render.cat)
-
-supp_tab1
-
-```
-
-### Supplementary Table 2
-
-Table of functional outcomes identified in sample
-
-```{r}
-dat_supptab2_outcomes <- dat_incl |> 
-  pivot_longer(
-    cols = starts_with("outcome"), 
-    names_to = "which_outcome", 
-    values_to = "outcome") |> 
-  mutate(
-    outcome = recode(
-      outcome,
-      "mRS" = "Modified Rankin Scale", 
-      "GMFCS" = "Gross Motor Function Classification System", 
-      "UPDRS (composite)" = "Unified Parkinson's Disease Rating Scale (composite)", 
-      "UPDRS-III" = "Unified Parkinson's Disease Rating Scale-III", 
-      "NIHSS" = "National Institutes of Health Stroke Scale", 
-      "EDSS" = "Expanded Disability Status Scale", 
-      "MSSS" = "Multiple Sclerosis Severity Score", 
-      "PedNIHSS" = "National Institutes of Health Stroke Scale (pediatric)", 
-      "PSOM" = "Pediatric Stroke Outcome Measure", 
-      "TMS" = "The Unified Huntington's Disease Rating Scale ‐ Total Motor Score",
-      "TFC" = "The Unified Huntington's Disease Rating Scale ‐ Total Functional Capacity",
-      "SARA" = "Scale for Assessment and Rating of Ataxia",
-      "ICARS" = "International Cooperative Ataxia Rating Scale",
-      "INAS" = "Inventory of Non-Ataxia Signs",
-      "RS" = "Rankin Scale",
-      "mNIHSS" = "Modified National Institutes of Health Stroke Scale",
-      "GOS (unextended)" = "Glasgow Outcome Scale",
-      " NIHSS" = "National Institutes of Health Stroke Scale",
-      "Katz index" = "Katz Index",
-      "GOSE" = "Glasgow Outcome Scale - Extended",
-      "GBS disability scale" = "Guillain-Barré Syndrome Disability Scale",
-      "Medical Research Council (MRC) sum score" = "Medical Research Council Sum Score",
-      "I-RODS" = "Inflammatory Rasch-Built Overall Disability Scale",
-      "GDS" = "Guillain-Barré Syndrome Disability Scale",
-      "WIDEA-FS" = "The Warner Initial Developmental Evaluation of Adaptive and Functional Skills",
-      "KOSCHI" = "King's Outcome Scale for Childhood Head Injury",
-      "UHDRS" = "Unified Huntington's Disease Rating Scale",
-      "SCOPA" = "Scales for Outcomes in Parkinson's Disease",
-      "GOS-E-Peds" = "Glasgow Outcome Scale - Extended (pediatric)",
-      " PCPC" = "Pediatric Cerebral Performance Category Scale",
-      "IBMFRS" = "Inclusion Body Myositis-Functional Rating Scale",
-      "UW-mRS" = "Utility-Weighted Modified Rankin Scale",
-      "ISNCSCI" = "International Standards for Neurological Classification of Spinal Cord Injury",
-      "SCIM 3" = "Spinal Cord Independence Measure, Version III",
-      "Ped-MSSS" = "Multiple Sclerosis Severity Score (pediatric)")
-  ) |> 
-  filter(!is.na(outcome)) |> 
-  
-  dplyr::rename(`Functional outcome` = `outcome`) 
-  
-
-
-my.render.cat <- function(x) {
-  c("", sapply(stats.default(x), function(y) with(y,
-                                                  sprintf("%d (%0.0f%%)", FREQ, PCT))))
-}
-
-supp_tab2 <- table1(~ `Functional outcome` | spbg_type_3cat, data = dat_supptab2_outcomes, 
-                    overall=c(left="Total"), 
-                    render.categorical=my.render.cat)
-
-supp_tab2
-```
-
-# Generate barplots
-
-#### Prepare a dataset for barplots
-
-```{r}
-dat_graphs <- dat_incl |> 
-  mutate(
-    any_figure_contains = case_when(
-     spbg_present == "Yes" & contains_adj_spbg == "No" & spbg_stratified == "No" ~ "Grotta bar(s) - all unadjusted", 
-     spbg_present == "Yes" & contains_adj_spbg == "No" & spbg_stratified == "Yes" ~ "Grotta bar(s) - stratified", 
-     contains_adj_spbg == "Yes" ~ "Grotta bar(s) with adjustment", 
-     
-     figure_other == "Yes" & spbg_present == "No" ~ "Non-Grotta bar figures only", 
-     figure_other == "No" & spbg_present == "No" ~ "No figures"),
-
-  # brush up the names of the neurological conditions
     condition1 = recode(
       condition1,
       "Ischemic stroke" = "Stroke", 
@@ -423,173 +389,108 @@ filter(neuropathology != "") |>
       "Huntington Disease" = "Huntington’s disease")
       ) |>
   
-  # relevel the any_figure_contains variable
-  mutate(
-    any_figure_contains = recode(
-      any_figure_contains, 
-      "No figure" = "No figures", 
-      "Other figure (No SPBG)" = "Non-Grotta bar figures only", 
-      "Unadjusted SPBG" = "Grotta bar(s) - all unadjusted", 
-      "Adjusted SPBG" = "Grotta bar(s) with adjustment"
-    ),
-    any_figure_contains = fct_relevel(any_figure_contains,
-                                      "No figures",
-                                      "Non-Grotta bar figures only", 
-                                      "Grotta bar(s) - all unadjusted",
-                                      "Grotta bar(s) - stratified only",
-                                      "Grotta bar(s) with model adjustment"), 
-    any_figure_contains = recode(any_figure_contains, 
-                                 "SPBG" = "Stacked proportional bar graph"))
-```
-
-mutate( any_figure_contains = recode( any_figure_contains, "SPBG" =
-"Stacked proportional bar graph"))
-
-```{r}
-
-#set up a dataframe for the "Stroke v. Other" barplot
-
-dat_barplot_stroke <- dat_graphs |> 
   mutate(
     neuropathology = fct_other(neuropathology, keep = "Stroke", 
-                                    other_level = "Other *"), 
-    neuropathology = fct_relevel(neuropathology, "Stroke", "Other *"))
-
-barplot_stroke <- ggplot(dat_barplot_stroke, 
-                         aes(x= neuropathology, 
-                             fill = any_figure_contains)) + 
-  geom_bar(width = 0.25, 
-           color = "white", 
-           alpha = 0.8) + 
-  
-  coord_flip() +
-  
-  scale_fill_manual(values = c("#a02322",
-                               "#eb807d",
-                               "#f9ccc9",
-                               "#90ACB4",
-                               "#d9dddf"),
-                    limits = c("Grotta bar(s) with adjustment", 
-                               "Grotta bar(s) - stratified",
-                               "Grotta bar(s) - all unadjusted",
-                               "Non-Grotta bar figures only",
-                               "No figures")) +
-  
-  theme_minimal() +
-  theme(
-    panel.grid.major.y = element_blank(), 
-    panel.grid.minor.y = element_blank(), 
-    panel.grid.minor = element_blank(),
-    axis.text.y = element_blank(),
-    
-    legend.title=element_blank(),
-    legend.key.size = unit(1, 'cm'),
-        legend.key.height = unit(.3, 'cm'),
-        legend.key.width = unit(.35, 'cm'),
-        legend.text = element_text(size = 9), 
-    legend.position = c(0.5, 1.0),
-    legend.direction="horizontal",
-    
-    axis.ticks = element_blank(), 
-    
-    axis.title.y=element_blank(), 
-    
-
-    plot.margin = unit(c(0.8,1,0,0), "cm")) +
-  geom_text(
-    stat= 'count' , aes(label=..count..), 
-            position = position_stack(vjust = .5), 
-            size = 3, 
-            color = 'black') +
-  annotate("text", x = 2, y = 215, label = "Total = 192", size = 3, fontface = "bold"
-           ) +
-  annotate("text", x = 1, y = 83, label = "Total = 60", size = 3, fontface = "bold") +
-  annotate("text", x = 2.23, y = 74, label = "Papers in the sample with a stroke population", size = 4, fontface = "bold") +
-  annotate("text", x = 1.23, y = 80, label = "Papers in the sample with a non-stroke population", size = 4, fontface = "bold") +
-  scale_y_continuous(limits = c(0, 250)) + 
-  labs(y = "Number of Papers")
-
-barplot_stroke
-
-barplot_stroke2 + theme(panel.spacing = unit(0.5, "lines"))
-
-ggsave("figure3.png")
+                                    other_level = "Other"), 
+    neuropathology = fct_relevel(neuropathology, "Stroke", "Other")) 
 
 
+# How many studies used Grotta bars?
+grotta_present <- sum(dat_analysis$spbg_present == "Yes")
+grotta_present
+grotta_present/250
 
+# How many studies did not use Grotta bars?
+grotta_not_present <- sum(dat_analysis$spbg_present == "No")
+grotta_not_present
+grotta_not_present/250
 
+# Of these, how many used a different type of figure to report functional outcomes?
+other_figure_used <- sum(dat_analysis$spbg_present == "No" & dat_analysis$figure_other == "Yes")
+other_figure_used # 157
+other_figure_used/157
 
-barplot_stroke_legend <- ggplot(dat_barplot_stroke, 
-                         aes(x= neuropathology, 
-                             fill = any_figure_contains)) + 
-  geom_bar(width = 0.25, 
-           color = "white", 
-           alpha = 0.8) + 
-  
-  coord_flip() +
-  
-  scale_fill_manual(values = c("#a02322",
-                               "#eb807d",
-                               "#f9ccc9",
-                               "#90ACB4",
-                               "#d9dddf"),
-                    limits = c("Grotta bar(s) - model-based adjustment", 
-                               "Grotta bar(s) - stratified",
-                               "Grotta bar(s) - unadjusted",
-                               "Non-Grotta bar figures only",
-                               "No figures")) +
-  
-  theme_minimal() +
-  theme(
-    panel.grid.major.y = element_blank(), 
-    panel.grid.minor.y = element_blank(), 
-    panel.grid.minor = element_blank(),
-    axis.text.y = element_blank(),
-    
-    legend.title=element_blank(),
-    legend.key.size = unit(1, 'cm'),
-        legend.key.height = unit(.3, 'cm'),
-        legend.key.width = unit(.35, 'cm'),
-        legend.text = element_text(size = 9),
-    
-    axis.ticks = element_blank(), 
-    
-    axis.title.y=element_blank(), 
-    
-
-    plot.margin = unit(c(0.8,1,0,0), "cm")) +
-  geom_text(
-    stat= 'count' , aes(label=..count..), 
-            position = position_stack(vjust = .5), 
-            size = 3, 
-            color = 'black') +
-  annotate("text", x = 2, y = 215, label = "Total = 192", size = 3, fontface = "bold"
-           ) +
-  annotate("text", x = 1, y = 83, label = "Total = 60", size = 3, fontface = "bold") +
-  annotate("text", x = 2.23, y = 74, label = "Papers in the sample with a stroke population", size = 4, fontface = "bold") +
-  annotate("text", x = 1.23, y = 80, label = "Papers in the sample with a non-stroke population", size = 4, fontface = "bold") +
-  scale_y_continuous(limits = c(0, 250)) + 
-  labs(y = "Number of Papers")
-
-barplot_stroke_legend
-
-barplot_stroke_legend + theme(panel.spacing = unit(0.5, "lines"))
-
-ggsave("figure3_legend.png")
-
-getwd()
-
+# Of these, how many used no figure to report functional outcomes?
+no_figure_used <- sum(dat_analysis$spbg_present == "No" & dat_analysis$figure_other == "No")
+no_figure_used
+no_figure_used/157
 ```
 
 
-Facet plot
+Table 1: Stroke population
 ```{r}
 
-ggplot(dat_barplot_stroke, 
-         aes(any_figure_contains)) + 
-  geom_bar() + 
-  facet_wrap(~neuropathology) +
-  coord_flip()
+dat_analysis_stroke <- dat_analysis |> 
+  filter(neuropathology == "Stroke")
 
+unadj_strat_adj <- sum(dat_analysis_stroke$contains_unadj_spbg == "Yes" & dat_analysis_stroke$contains_strat_spbg == "Yes" & dat_analysis_stroke$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+unadj_strat_adj
+
+strat_adj <- sum(dat_analysis_stroke$contains_unadj_spbg == "No" & dat_analysis_stroke$contains_strat_spbg == "Yes" & dat_analysis_stroke$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+strat_adj
+  
+unadj_adj <- sum(dat_analysis_stroke$contains_unadj_spbg == "Yes" & dat_analysis_stroke$contains_strat_spbg == "No" & dat_analysis_stroke$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+unadj_adj
+  
+adj <- sum(dat_analysis_stroke$contains_unadj_spbg == "No" & dat_analysis_stroke$contains_strat_spbg == "No" & dat_analysis_stroke$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+adj
+  
+unadj_strat <-sum(dat_analysis_stroke$contains_unadj_spbg == "Yes" & dat_analysis_stroke$contains_strat_spbg == "Yes" & dat_analysis_stroke$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+unadj_strat
+  
+strat <- sum(dat_analysis_stroke$contains_unadj_spbg == "No" & dat_analysis_stroke$contains_strat_spbg == "Yes" & dat_analysis_stroke$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+strat
+  
+unadj <- sum(dat_analysis_stroke$contains_unadj_spbg == "Yes" & dat_analysis_stroke$contains_strat_spbg == "No" & dat_analysis_stroke$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+unadj
+  
+no_spbg <- sum(dat_analysis_stroke$spbg_present == "No")
+no_spbg
+```
+
+
+Table 1: Other populations
+```{r}
+
+dat_analysis_other <- dat_analysis |> 
+  filter(neuropathology == "Other")
+
+unadj_strat_adj <- sum(dat_analysis_other$contains_unadj_spbg == "Yes" & dat_analysis_other$contains_strat_spbg == "Yes" & dat_analysis_other$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+unadj_strat_adj
+
+strat_adj <- sum(dat_analysis_other$contains_unadj_spbg == "No" & dat_analysis_other$contains_strat_spbg == "Yes" & dat_analysis_other$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+strat_adj
+  
+unadj_adj <- sum(dat_analysis_other$contains_unadj_spbg == "Yes" & dat_analysis_other$contains_strat_spbg == "No" & dat_analysis_other$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+unadj_adj
+  
+adj <- sum(dat_analysis_other$contains_unadj_spbg == "No" & dat_analysis_other$contains_strat_spbg == "No" & dat_analysis_other$contains_adj_spbg == "Yes", 
+    na.rm = TRUE)
+adj
+  
+unadj_strat <-sum(dat_analysis_other$contains_unadj_spbg == "Yes" & dat_analysis_other$contains_strat_spbg == "Yes" & dat_analysis_other$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+unadj_strat
+  
+strat <- sum(dat_analysis_other$contains_unadj_spbg == "No" & dat_analysis_other$contains_strat_spbg == "Yes" & dat_analysis_other$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+strat
+  
+unadj <- sum(dat_analysis_other$contains_unadj_spbg == "Yes" & dat_analysis_other$contains_strat_spbg == "No" & dat_analysis_other$contains_adj_spbg == "No", 
+    na.rm = TRUE)
+unadj
+  
+no_spbg <- sum(dat_analysis_other$spbg_present == "No")
+no_spbg
 ```
 
